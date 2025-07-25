@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang = "en">
+<head>
+    <meta charset = "UTF-8">
+    <meta name = "viewport" content = "width=device-width, initial-scale=1.0">
+    <title>Flagoose</title>
+    <script src = "/socket.io/socket.io.js"></script>
+    
+    <script src = "utils.js"></script>
+    <script defer src = "Board.js"></script>
+    <script defer src = "Player.js"></script>
+    <script defer src = "app.js"></script>
+
+    <link rel  = "preconnect" href = "https://fonts.googleapis.com">
+    <link rel  = "preconnect" href = "https://fonts.gstatic.com" crossorigin>
+    <link href = "https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap" rel = "stylesheet">
+    <link rel  = "stylesheet" href = "style.css" />
+</head>
+<body>
+    <div id = "board"></div>
+    <div id = "player1-info" class = "info player1">
+        <div class = "img-and-secrets">
+            <div class = "image"></div>
+            <div class = "secrets">
+                <div class="secret card-holder"></div>
+                <div class="secret card-holder"></div>
+                <div class="secret card-holder"></div>
+            </div>
+        </div>
+        <span class = "username"></span>
+        <div class = "hp-bar"></div>
+    </div>
+
+    <div id = "player2-info" class = "info player2">
+        <div class = "img-and-secrets">
+            <div class = "secrets">
+                <div class="secret card-holder"></div>
+                <div class="secret card-holder"></div>
+                <div class="secret card-holder"></div>
+            </div>
+            <div class = "image"></div>
+        </div>
+        <span class = "username"></span>
+        <div class = "hp-bar"></div>
+    </div>
+</body>
+</html>

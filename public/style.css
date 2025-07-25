@@ -1,0 +1,385 @@
+/*--------------------------------------CSS Reset---------------------------------------*/
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+* {
+    margin: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        interpolate-size: allow-keywords;
+    }
+}
+
+body {
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+img, picture, video, canvas, svg {
+    display: block;
+    max-width: 100%;
+}
+
+input, button, textarea, select {
+    font: inherit;
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+    overflow-wrap: break-word;
+}
+
+p {
+    text-wrap: pretty;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    text-wrap: balance;
+}
+
+#root, #__next {
+    isolation: isolate;
+}
+
+html, body {
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: self-end;
+    overflow: hidden;
+}
+
+/*----------------------------------------Fonts-----------------------------------------*/
+.username, .hp-bar::after {
+  font-family: "Fjalla One", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: .12rem;
+}
+
+/*----------------------------------------Errors----------------------------------------*/
+#error-msg {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    font-size:24px;
+    color:#e2dcea;
+    background:#282729;
+}
+
+/*----------------------------------------Tiles-----------------------------------------*/
+:root {
+    --tile-w: 3rem;
+    /*font-size: 1vw;*/
+}
+
+#board {
+    position: relative;
+    width: 90vmin;
+    height: 85vmin;
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.tile {
+    position: absolute;
+    width:  var(--tile-w);
+    height: var(--tile-w);
+    background: #c7b3a3;
+    color: white;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    transform: rotate(var(--tile-rotation)); /*defined on creation*/
+}
+
+.tile:hover {
+    border: 5px solid blanchedalmond;
+}
+
+.tile.start::before {
+    content: "GO!";
+    position: absolute;
+    font-size: calc(var(--tile-w) * 0.35);
+    transform: rotate(calc(-1 * var(--tile-rotation)));
+}
+
+.tile.flag {
+    background: rgb(247, 213, 48);
+}
+
+.tile.damage {
+    background: #9c1fda;
+}
+
+.tile.damage::before {
+    content: "-1";
+    position: absolute;
+    font-size: 1.5em;
+    transform: rotate(calc(-1 * var(--tile-rotation)));
+}
+
+.tile.trap {
+    background: #513b27;
+}
+
+.tile.heal {
+    background: #56d243;
+}
+
+.tile.heal::before {
+    content: "+1";
+    position: absolute;
+    font-size: 1.5em;
+    transform: rotate(calc(-1 * var(--tile-rotation)));
+}
+
+.tile.action {
+    color: #f4d619;
+    background: #0c0a2d;
+}
+
+.tile.secret {
+    color: #af28f8;
+    background: #2a162e;
+}
+
+.tile.action::before, .tile.secret::before {
+    content: "?";
+    position: absolute;
+    font-size: calc(var(--tile-w) * 0.6);
+    transform: rotate(calc(-1 * var(--tile-rotation)));
+}
+
+/*------------------------------------Hovering stuff------------------------------------*/
+.tile.destination, .holding-flag {
+    z-index: 1;
+}
+
+.tile.destination::after, .holding-flag::after {
+    content: "";
+    background-size: contain;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    animation: bob infinite 1.5s ease-in-out;
+    z-index: 3;
+}
+
+.holding-flag::after {
+    position: absolute;
+    --tx: 22%;
+    --ty: -65%;
+    width:  calc(var(--tile-w) * 1.2);
+    height: calc(var(--tile-w) * 1.2);
+}
+
+.sprite.holding-flag::after {
+    --tx: 9%;
+    --ty: -110%;
+}
+
+.tile.flag.holding-flag::after {
+    background-image: url("./assets/flag.svg");
+}
+
+.player1.holding-flag::after {
+    background-image: url("./assets/flag_1.svg");
+}
+
+.player2.holding-flag::after {
+    background-image: url("./assets/flag_2.svg");
+}
+
+.tile.destination:not(.holding-flag)::after {
+    --tx: 0%;
+    --ty: -100%;
+    background-image: url("./assets/destination.svg");
+    width:  calc(var(--tile-w) * 0.5);
+    height: calc(var(--tile-w) * 0.5);
+}
+
+.tile.destination.holding-flag {
+    background: blanchedalmond;
+}
+
+.tile.destination:not(.holding-flag):hover::after {
+    --ty: -120%;
+}
+
+.tile.destination.holding-flag:hover::after {
+    --ty: -80%;
+}
+
+@keyframes bob {
+    0%, 100% {
+        transform: rotate(calc(-1 * var(--tile-rotation))) translateX(var(--tx)) translateY(var(--ty));
+    }
+    50% {
+        transform: rotate(calc(-1 * var(--tile-rotation))) translateX(var(--tx)) translateY(calc(var(--ty) + 20%));
+    }
+}
+
+/*------------------------------------Player sprites------------------------------------*/
+.player1 {
+    --p1-col: #1f80da;
+    background-color: var(--p1-col);
+}
+
+.player2 {
+    --p2-col: #be2f0e;
+    background-color: var(--p2-col);
+}
+
+.sprite {
+    --tile-rotation: 0rad; /* Needed so the flag can bob */
+    position: absolute;
+    width: calc(var(--tile-w) * 0.8);
+    height: calc(var(--tile-w) * 1.54);
+    transform: translateX(12%) translateY(-55%);
+    z-index: 2;
+    transition: top 0.25s ease, left 0.25s ease;
+    pointer-events: none;
+}
+
+.sprite.hop {
+    --hop-height: calc(var(--tile-w) * 0.3);
+    animation: hop .3s ease;
+}
+
+@keyframes hop {
+  0%   { transform: translateX(12%) translateY(-55%); }
+  50%  { transform: translateX(12%) translateY(calc(-55% - var(--hop-height))); }
+  100% { transform: translateX(12%) translateY(-55%); }
+}
+
+/*-----------------------------------Player Info Cards----------------------------------*/
+.info {
+    position: fixed;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    font-size: large;
+    margin: 1rem;
+    border-radius: .25rem;
+}
+
+.img-and-secrets {
+    display: flex;
+    flex-direction: row;
+    padding: 1rem;
+    gap: 1rem;
+}
+
+.image {
+    width: 7rem;
+    height: 7rem;
+    flex: 0 0 7rem;
+    padding: .5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-right: 4px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: .5rem;
+}
+
+.secrets {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    padding: .5rem;
+    gap: .5rem;
+}
+
+.card-holder.secret {
+    width: 5rem;
+    height: 8rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: .25rem;
+}
+
+.username {
+    background-color: #e2dcea;
+    color: #0c0a2d;
+    border-radius: .25rem;
+    padding-inline: 1rem;
+    height: 2rem;
+    line-height: 2.2rem;
+    text-transform: uppercase;
+    margin-inline: 1rem;
+    align-self: stretch;
+}
+
+.hp-bar {
+    --hp: 5;
+    position: relative;
+    width: 10rem;
+    height: 1.5rem;
+    border-radius: .5rem;
+    background: rgba(0, 0, 0, 0.3);
+    margin-block: .5rem;
+    margin-inline: 1rem;
+    padding: .25rem;
+}
+
+.hp-bar::before {
+    content: "";
+    position: absolute;
+    display: block;
+    width: calc(1.9rem * var(--hp));
+    height: 1rem;
+    border-radius: .3rem;
+    background: repeating-linear-gradient(
+        to right,
+        rgba(241, 193, 60) 0,
+        rgba(241, 193, 60) 1.58rem,
+        transparent 1.58rem,
+        transparent 1.98rem);
+}
+
+.hp-bar::after {
+    content: "HP";
+    position: absolute;
+    color: rgb(241, 193, 60);
+    bottom: -5%;
+    line-height: 1.5rem;
+}
+
+.info.player1 {
+    left: 0;
+    box-shadow: .5rem .5rem 0 0 rgba(0, 0, 0, 0.4);
+}
+
+.info.player1 > .hp-bar::after {
+    right: -20%;
+}
+
+.info.player2 {
+    right: 0;
+    box-shadow: -.5rem .5rem 0 0 rgba(0, 0, 0, 0.4);
+    text-align: right;
+    align-items: flex-end;
+}
+
+.info.player2 > .hp-bar::after {
+    left: -18%;
+}
+
+.info.player2 > .hp-bar::before {
+    right: .25rem;
+    background: repeating-linear-gradient(
+        to left,
+        rgba(241, 193, 60) 0,
+        rgba(241, 193, 60) 1.58rem,
+        transparent 1.58rem,
+        transparent 1.98rem);
+}
