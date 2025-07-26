@@ -13,12 +13,11 @@ class Player {
         this.sprite.classList.add(className, "sprite");
         board.appendChild(this.sprite);
         
-        const infoCard    = document.getElementById(className + "-info");
-        infoCard.username = infoCard.getElementsByClassName("username")[0];
-        infoCard.hpBar    = infoCard.getElementsByClassName("hp-bar")[0];
-        infoCard.secrets  = infoCard.getElementsByClassName("secrets")[0];
-
-        infoCard.username.textContent = username;
+        this.infoCard          = document.getElementById(className + "-info");
+        this.infoCard.username = this.infoCard.getElementsByClassName("username")[0];
+        this.infoCard.hpBar    = this.infoCard.getElementsByClassName("hp-bar")[0];
+        this.infoCard.secrets  = this.infoCard.getElementsByClassName("secrets")[0];
+        this.infoCard.username.textContent = username;
 
         this.spawnTile = isPlayer1 ? p1Start : p2Start;
     }
@@ -34,6 +33,18 @@ class Player {
         this.setOpacity(1);
     }
 
+    getNewSecret(secret) {
+        if(this.secrets.length >= 3) return;
+
+        this.infoCard.secrets.childNodes[this.secrets.length]; // append card here..
+        this.secrets.push(secret);
+    }
+
+    heal(amt) {
+        this.hp = Math.min(Math.max(this.hp + amt, 0), 5);
+        this.infoCard.hpBar.style.setProperty("--hp", this.hp);
+    }
+    
     setOpacity(amt) { this.sprite.style.opacity = amt; }
 
     moveToTile(tile) {
@@ -42,6 +53,8 @@ class Player {
     }
 
     addDestination(tile, path) {
+        if(tile.classList.contains("blocked")) return; // Extra protection, probably not needed
+
         tile.classList.add("destination");
         this.paths[tile.id] = path;
 
@@ -113,7 +126,7 @@ function setDestinations(currentTile, steps, prevTile = null, currentPath = []) 
 
     const paths = [];
     for(const neigh of currentTile.neighs) {
-        if(neigh === prevTile) continue;
+        if(neigh === prevTile || neigh.classList.contains("blocked")) continue;
 
         paths.push(setDestinations(neigh, steps - 1, currentTile, currentPath));
         if(isBranching) currentPath = [...pathInCommon];

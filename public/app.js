@@ -19,6 +19,11 @@ client.on("pick-hero", isPlayer1 => {
     console.log("I am player " + (1 + !isPlayer1));
     
     TILES.forEach(tile => tile.addEventListener("click", _=> {
+        if(canPlaceBollard) {
+            placeBollard(tile);
+            return;
+        }
+
         if(tile.classList.contains("destination")) gm.movePlayer(tile);
     }));
 
@@ -49,6 +54,7 @@ client.on("opponent-move", async path => {
 
 client.on("proceed", () => {
     gm.turn++;
+    updateBollards();
     if(isPlayerTurn()) gm.showPossibleMoves();
 });
 
@@ -74,7 +80,16 @@ class LocalGameManager {
         client.emit("opponent-move", player.paths[destinationTile.id].map(tile => tile.id));
         const oldFlags = player.flags;
         await player.goToDestination(destinationTile);
+        this.affectPlayer(); // why tf is this here?
         client.emit(oldFlags == player.flags ? "proceed" : "game-start");
+    }
+
+    affectPlayer() {
+        switch(player.currentTile.style.getPropertyValue("--type")) {
+            case "heal":   player.heal(1); break;
+            case "damage": player.heal(-1); break;
+            case "secret": player.getNewSecret(getRandomSecret()); break;
+        }
     }
 }
 gm = new LocalGameManager();
@@ -95,10 +110,10 @@ if: player rolls
         player.computeMoves(roll)
         wait: player chooses destination -> inform opponent of destination
         player.goToDestination(dest) -> opponent computes animation
-        player is affected by destination -> inform opponent of HP, action, secrets, flag position
         wait: player action
         if: player uses secret ...
         if: proceed
+            player is affected by destination -> inform opponent of HP, action, secrets, flag position
 
 turn ends -> inform opponent
 */

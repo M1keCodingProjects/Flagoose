@@ -131,6 +131,15 @@ function nudge(tileId, x = 0, y = 0) {
     TILES[tileId].style.top  = `calc(${TILES[tileId].style.top} + var(--tile-w) * ${y})`;
 }
 
+function setRole(tile, role) {
+    tile.classList.add(role);
+    tile.style.setProperty("--type", role);
+}
+
+function setRoleMany(role, ...tileIds) {
+    tileIds.forEach(tileId => setRole(TILES[tileId], role));
+}
+
 const board  = document.getElementById("board");
 const TILES  = [];
 let START_ID = 0;
@@ -181,28 +190,10 @@ function setupBoard() {
 
     flagTile.classList.add("flag", "holding-flag");
 
-    TILES[2].classList.add("damage");
-    TILES[17].classList.add("damage");
-    TILES[46].classList.add("damage");
-    TILES[50].classList.add("damage");
-    TILES[31].classList.add("trap");
-    TILES[35].classList.add("trap");
-    TILES[38].classList.add("trap");
-    TILES[42].classList.add("trap");
-    TILES[11].classList.add("heal");
-    TILES[26].classList.add("heal");
-    TILES[6].classList.add("action");
-    TILES[10].classList.add("action");
-    TILES[21].classList.add("action");
-    TILES[25].classList.add("action");
-    TILES[30].classList.add("action");
-    TILES[37].classList.add("action");
-    TILES[7].classList.add("secret");
-    TILES[14].classList.add("secret");
-    TILES[22].classList.add("secret");
-    TILES[29].classList.add("secret");
-    TILES[45].classList.add("secret");
-    TILES[49].classList.add("secret");
-
+    setRoleMany("damage", 2, 17, 46, 50);
+    setRoleMany("trap", 31, 35, 38, 42);
+    setRoleMany("heal", 11, 26);
+    setRoleMany("action", 6, 10, 21, 25, 30, 37);
+    setRoleMany("secret", 7, 14, 22, 29, 45, 49);
     boardIsSet = true;
 }
