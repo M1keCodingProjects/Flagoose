@@ -21,6 +21,7 @@ client.on("pick-hero", isPlayer1 => {
     TILES.forEach(tile => tile.addEventListener("click", _=> {
         if(canPlaceBollard) {
             placeBollard(tile);
+            canPlaceBollard = false;
             return;
         }
 
@@ -52,10 +53,11 @@ client.on("opponent-move", async path => {
     await opponent.moveSprite(path.map(id => TILES[id]));
 });
 
-client.on("proceed", () => {
-    gm.turn++;
-    updateBollards();
-    if(isPlayerTurn()) gm.showPossibleMoves();
+client.on("proceed", data => {
+    console.log("hi", data, player.id, gm.turn);
+    opponent.sync(data);
+    gm.startNewTurn();
+    console.log(gm.turn);
 });
 
 function isPlayerTurn() { return player.turnId == (gm.turn % 2); }
@@ -63,6 +65,12 @@ function isPlayerTurn() { return player.turnId == (gm.turn % 2); }
 class LocalGameManager {
     constructor() {
         this.turn = 0;
+    }
+
+    startNewTurn() {
+        this.turn++;
+        updateBollards();
+        if(isPlayerTurn()) this.showPossibleMoves();
     }
 
     rollDice() {
@@ -80,8 +88,17 @@ class LocalGameManager {
         client.emit("opponent-move", player.paths[destinationTile.id].map(tile => tile.id));
         const oldFlags = player.flags;
         await player.goToDestination(destinationTile);
+        if(oldFlags != player.flags) {
+            client.emit("game-start");
+            return;
+        }
+
         this.affectPlayer(); // why tf is this here?
-        client.emit(oldFlags == player.flags ? "proceed" : "game-start");
+        client.emit("proceed", {
+            hp : player.hp,
+            secretsNames : player.secrets.map(secret => secret.name)
+        });
+        gm.startNewTurn();
     }
 
     affectPlayer() {

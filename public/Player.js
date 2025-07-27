@@ -29,15 +29,22 @@ class Player {
 
     reset() {
         this.moveToSpawn();
-        this.hp = 5;
+        this.heal(5);
         this.setOpacity(1);
     }
 
-    getNewSecret(secret) {
+    sync({hp, secretsNames}) {
+        this.hp = hp;
+        this.infoCard.hpBar.style.setProperty("--hp", this.hp);
+
+        secretsNames.forEach((secretName, i) => this.getNewSecret(SECRETS[secretName], i));
+    }
+
+    getNewSecret(secret, pos = this.secrets.length) {
         if(this.secrets.length >= 3) return;
 
-        this.infoCard.secrets.childNodes[this.secrets.length]; // append card here..
-        this.secrets.push(secret);
+        this.secrets[pos] = secret;
+        this.infoCard.secrets.children[pos].innerHTML = secret.getCard().outerHTML;
     }
 
     heal(amt) {

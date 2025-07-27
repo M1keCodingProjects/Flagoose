@@ -1,0 +1,51 @@
+<svg width="68" height="74" viewBox="0 0 68 74" fill="none" xmlns="http://www.w3.org/2000/svg" style = "color: #1f80da">
+<path d="M11.3333 26.6667L34 4.00001L56.6667 26.6667L34 49.3333L11.3333 26.6667Z" fill="currentColor"/>
+<path d="M34 49.3333L56.6667 26.6667L56.6667 49.3333L34 72V49.3333Z" fill="currentColor"/>
+<path d="M34 49.3333L56.6667 26.6667L56.6667 49.3333L34 72V49.3333Z" fill="black" fill-opacity="0.2"/>
+<path d="M34 49.3333L11.3333 26.6667L11.3333 49.3333L34 72V49.3333Z" fill="currentColor"/>
+<path d="M34 49.3333L11.3333 26.6667L11.3333 49.3333L34 72V49.3333Z" fill="black" fill-opacity="0.4"/>
+<path d="M18 10L28 1.24288e-06L38 10L28 20L18 10Z" fill="currentColor"/>
+<path d="M28 20L38 10L38 20L28 30V20Z" fill="currentColor"/>
+<path d="M28 20L38 10L38 20L28 30V20Z" fill="black" fill-opacity="0.2"/>
+<path d="M28 20L18 10L18 20L28 30V20Z" fill="currentColor"/>
+<path d="M28 20L18 10L18 20L28 30V20Z" fill="black" fill-opacity="0.4"/>
+<path d="M18 50L22 46L34.0006 57.9998L38.0006 53.9998L42.0006 57.9998L34.0006 65.9998L18 50Z" fill="#E0CFCF"/>
+<path d="M18 50L22 46L32 56L28 60L18 50Z" fill="currentColor"/>
+<path d="M34.0005 65.9999L42.0005 57.9999L42.0005 65.9999L34.0005 73.9999L34.0005 65.9999Z" fill="#E0CFCF"/>
+<path d="M34.0005 65.9999L42.0005 57.9999L42.0005 65.9999L34.0005 73.9999L34.0005 65.9999Z" fill="black" fill-opacity="0.2"/>
+<path d="M34.0007 65.9998L18.0006 49.9998L18.0006 57.9998L34.0007 73.9998L34.0007 65.9998Z" fill="#E0CFCF"/>
+<path d="M34.0007 65.9998L18.0006 49.9998L18.0006 57.9998L34.0007 73.9998L34.0007 65.9998Z" fill="black" fill-opacity="0.4"/>
+<path d="M28 60L18.0006 49.9998L18.0006 57.9998L28 68L28 60Z" fill="currentColor"/>
+<path d="M28 60L18.0006 49.9998L18.0006 57.9998L28 68L28 60Z" fill="black" fill-opacity="0.4"/>
+<path d="M23 17L37 3L51 17L37 31L23 17Z" fill="currentColor"/>
+<path d="M37 31L51 17L51 31L37 45V31Z" fill="#E0CFCF"/>
+<path d="M37 31L51 17L51 31L37 45V31Z" fill="black" fill-opacity="0.2"/>
+<path d="M37 31L23 17L23 31L37 45V31Z" fill="currentColor"/>
+<path d="M37 31L23 17L23 31L37 45V31Z" fill="black" fill-opacity="0.4"/>
+<path d="M50 19L49 20L49 31L50 32L50 19Z" fill="currentColor"/>
+<path d="M50 19L49 20L49 31L50 32L50 19Z" fill="black" fill-opacity="0.4"/>
+<path d="M38.9999 29.5L48.4998 20L48.4997 21.5128L38.9999 31.0129L38.9999 29.5Z" fill="#727D72"/>
+<path d="M38.9999 29.5L48.4998 20L48.4997 21.5128L38.9999 31.0129L38.9999 29.5Z" fill="black" fill-opacity="0.2"/>
+<path d="M50 19L40 29L40 28L51 17L51 31L50 32L50 19Z" fill="currentColor"/>
+<path d="M50 19L40 29L40 28L51 17L51 31L50 32L50 19Z" fill="black" fill-opacity="0.2"/>
+<path d="M50 32L49 31L40 40V42L50 32Z" fill="currentColor"/>
+<path d="M39.5002 36L49.0131 26.4871L50.513 27.9871L41.0002 37.5L39.5002 36Z" fill="#727D72"/>
+<path d="M41.0002 37.5001L50.5 28L50.5 37L41.0002 46.5001L41.0002 37.5001Z" fill="#727D72"/>
+<path d="M41.0002 37.5001L50.5 28L50.5 37L41.0002 46.5001L41.0002 37.5001Z" fill="black" fill-opacity="0.2"/>
+<path d="M41.0001 37.5L39.5001 36L39.5001 45L41.0001 46.5L41.0001 37.5Z" fill="#727D72"/>
+<path d="M41.0001 37.5L39.5001 36L39.5001 45L41.0001 46.5L41.0001 37.5Z" fill="black" fill-opacity="0.4"/>
+<path d="M36 22L38 20L40 22L38 24L36 22Z" fill="#C3B9AC"/>
+<path d="M38 24L40 22L40 57L38 59L38 24Z" fill="#C3B9AC"/>
+<path d="M38 24L40 22L40 57L38 59L38 24Z" fill="black" fill-opacity="0.2"/>
+<path d="M38 24L36 22L36 57L38 59L38 24Z" fill="#C3B9AC"/>
+<path d="M38 24L36 22L36 57L38 59L38 24Z" fill="black" fill-opacity="0.4"/>
+<path d="M36 20L38 18L40 20L38 22L36 20Z" fill="#593939"/>
+<path d="M38 22L40 20L40 22L38 24V22Z" fill="#593939"/>
+<path d="M38 22L40 20L40 22L38 24V22Z" fill="black" fill-opacity="0.2"/>
+<path d="M38 22L36 20L36 22L38 24V22Z" fill="#593939"/>
+<path d="M38 22L36 20L36 22L38 24V22Z" fill="black" fill-opacity="0.4"/>
+<path d="M46 24L48 22L48 24L46 26V24Z" fill="#511515"/>
+<path d="M46 24L48 22L48 24L46 26V24Z" fill="black" fill-opacity="0.2"/>
+<path d="M40 30L42 28L42 30L40 32V30Z" fill="#511515"/>
+<path d="M40 30L42 28L42 30L40 32V30Z" fill="black" fill-opacity="0.2"/>
+</svg>

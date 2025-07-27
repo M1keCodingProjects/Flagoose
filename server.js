@@ -31,7 +31,7 @@ class GameManager {
 
         client.on("game-start", this.onGameStart.bind(this));
         client.on("opponent-move", path => client.broadcast.emit("opponent-move", path));
-        client.on("proceed", () => this.server.emit("proceed"));
+        client.on("proceed", data => client.broadcast.emit("proceed", data));
         
         const isPlayer1 = this.p1 === null;
         this[isPlayer1 ? "p1" : "p2"] = client;

@@ -31,27 +31,27 @@ function updateBollards() {
 }
 
 class Secret {
-    constructor(name, effect, descr, color) {
+    constructor(name, effect, descr) {
         this.name   = name;
         this.effect = effect;
 
         this.card = document.createElement("div");
         this.card.classList.add("secret", "card");
-        this.card.innerHTML = `<span class = "secret-name" style = "--color: ${color}">${name}<\\span>
-            <div class = "secret-icon"></div>
+        this.card.dataset.isVisible = true;
+        this.card.innerHTML = `<span class = "secret-name">${name}</span>
             <p class = "secret-description">${descr}</p>`;
     }
 
     getCard() { return this.card.cloneNode(true); }
 }
 
-const SECRETS = [
-    new Secret("Bollard",
+const SECRETS = {
+    Bollard: new Secret("Bollard",
         () => canPlaceBollard = true,
-        "Places an uncrossable barrier on any tile which lasts for 3 turns.",
-        "rgb(192, 176, 160)"),
-];
+        "Place a barrier on any tile which lasts for 3 turns and cannot be crossed."),
+};
+const SECRETS_AMT = Object.keys(SECRETS).length;
 
 function getRandomSecret() {
-    return SECRETS[Math.floor(Math.random() * SECRETS.length)];
+    return Object.values(SECRETS)[Math.floor(Math.random() * SECRETS_AMT)];
 }
