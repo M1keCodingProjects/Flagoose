@@ -57,7 +57,7 @@ body {
 }
 
 /*----------------------------------------Fonts-----------------------------------------*/
-.username, .hp-bar::after, .bollard::before {
+.username, .hp-bar::after, .bollard::before, .proceed-btn {
   font-family: "Fjalla One", sans-serif;
   font-weight: 400;
   font-style: normal;
@@ -253,7 +253,6 @@ body {
     position: absolute;
     width: calc(var(--tile-w) * 1.3);
     aspect-ratio: 1 / 1;
-    transform: translateX(-7%) translateY(-30%);
     z-index: 2;
     transition: top 0.25s ease, left 0.25s ease;
     pointer-events: none;
@@ -270,16 +269,12 @@ body {
   100% { transform: translateX(-7%) translateY(-30%); }
 }
 
-.sprite.player1 {
-    background: url("./assets/ganjalf-1.svg");
-    background-size: contain;
-    background-repeat: no-repeat;
+.sprite.Ganjalf {
+    transform: translateX(-7%) translateY(-30%);
 }
 
-.sprite.player2 {
-    background: url("./assets/ganjalf-2.svg");
-    background-size: contain;
-    background-repeat: no-repeat;
+.sprite.Babatunde {
+    transform: translateX(-12%) translateY(-32%);
 }
 
 /*-----------------------------------Player Info Cards----------------------------------*/
@@ -407,6 +402,36 @@ body {
         transparent 1.98rem);
 }
 
+.proceed-btn {
+    visibility: hidden;
+    position: fixed;
+    top: 19rem;
+    padding: 1rem;
+    border-radius: .25rem;
+    background-color: rgb(43, 160, 43);
+    color: rgb(245, 245, 245);
+    transition: all 0.25s ease;
+    border: none;
+}
+
+.proceed-btn:hover {
+    transform: scale(1.1);
+    background-color: rgb(58, 175, 58);
+}
+
+.proceed-btn:active {
+    transform: scale(0.9);
+    background-color: rgb(87, 205, 87);
+}
+
+.proceed-btn.player1 {
+    left: 1rem;
+}
+
+.proceed-btn.player2 {
+    right: 1rem;
+}
+
 /*----------------------------------------Secrets---------------------------------------*/
 .secret.card {
     color: #af28f8;
@@ -431,7 +456,7 @@ body {
     box-shadow: inset 0 0 1rem .5rem rgba(255, 255, 255, 0.2);
 }
 
-.secret.card[data-is-visible = "true"]:hover {
+.secret.card[data-is-visible = "true"]:hover, .secret.card.can-respond {
     transform: scale(1.2) translateY(1rem);
 }
 

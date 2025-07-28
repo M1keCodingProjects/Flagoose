@@ -1,16 +1,22 @@
 async function sleep(ms) { await new Promise(success => setTimeout(success, ms)); }
 
 class Player {
-    constructor(isPlayer1, username) {
-        this.id      = 1 + !isPlayer1;
-        this.hp      = 5;
-        this.secrets = [];
-        this.flags   = 0;
+    constructor(isPlayer1, username, hero) {
+        this.id = 1 + !isPlayer1;
+        this.hp = 5;
+        this.flags = 0;
+        this.secrets = [null, null, null];
+        this.ability = HEROS[hero];
+        this.secretCards = [null, null, null];
+        this.incomingEffectName = "";
         
         const className = "player" + this.id;
         this.sprite = document.createElement("div");
         this.sprite.id = className + "-sprite";
-        this.sprite.classList.add(className, "sprite");
+        this.sprite.classList.add(className, "sprite", hero);
+        this.sprite.style.setProperty("background", `url(./assets/${hero}-${this.id}.svg)`);
+        this.sprite.style.setProperty("background-size", "contain");
+        this.sprite.style.setProperty("background-repeat", "no-repeat");
         board.appendChild(this.sprite);
         
         this.infoCard          = document.getElementById(className + "-info");
@@ -19,7 +25,8 @@ class Player {
         this.infoCard.secrets  = this.infoCard.getElementsByClassName("secrets")[0];
         this.infoCard.username.textContent = username;
 
-        this.spawnTile = isPlayer1 ? p1Start : p2Start;
+        this.proceedBtn = document.getElementById("proceed-btn-" + this.id); // click listener set by gm
+        this.spawnTile  = isPlayer1 ? p1Start : p2Start;
     }
 
     moveToSpawn() {
@@ -37,14 +44,71 @@ class Player {
         this.hp = hp;
         this.infoCard.hpBar.style.setProperty("--hp", this.hp);
 
-        secretsNames.forEach((secretName, i) => this.getNewSecret(SECRETS[secretName], i));
+        secretsNames.forEach((secretName, i) => {
+            if(secretName) this.getNewSecret(SECRETS[secretName], i, false);
+            else this.removeSecret(i);
+        });
     }
 
-    getNewSecret(secret, pos = this.secrets.length) {
-        if(this.secrets.length >= 3) return;
+    setIncomingEffect() {
+        switch(this.currentTile.style.getPropertyValue("--type")) {
+            case "heal":   this.incomingEffectName = "Heal";       break;
+            case "damage": this.incomingEffectName = "Damage";     break;
+            case "secret": player.getNewSecret(getRandomSecret()); break;
+        }
+        
+        let countResponses = 0;
+        this.secrets.forEach((secret, i) => {
+            if(!secret?.canRespond(this.incomingEffectName)) return;
+
+            this.secretCards[i].classList.add("can-respond");
+            countResponses++;
+        });
+
+        if(countResponses) this.proceedBtn.style.visibility = "visible";
+        else this.proceed();
+    }
+
+    experienceIncomingEffect() {
+        SECRETS[this.incomingEffectName]?.effect();
+        this.incomingEffectName = "";
+    }
+
+    proceed() {
+        this.proceedBtn.onclick();
+        this.proceedBtn.style.visibility = "hidden";
+    }
+
+    getNewSecret(secret, pos = this.secrets.indexOf(null), isVisible = true) {
+        // length also counts nulls so this is the fastest way to say "all 3 exist":
+        if(this.secrets[0] && this.secrets[1] && this.secrets[2]) return;
+        if(this.secrets[pos]?.name === secret.name) return; // No change
 
         this.secrets[pos] = secret;
-        this.infoCard.secrets.children[pos].innerHTML = secret.getCard().outerHTML;
+        const card = secret.getCard();
+        card.dataset.isVisible = isVisible;
+        if(isVisible) card.addEventListener("click", () => {
+            if(!card.classList.contains("can-respond")) return;
+            
+            secret.effect();
+            this.removeSecret(pos);
+
+            // Only one response allowed:
+            this.secretCards.forEach(card => card?.classList?.remove("can-respond"));
+            this.proceed();
+        });
+
+        this.secretCards[pos] = card;
+        this.infoCard.secrets.children[pos].appendChild(card); // Should always be empty
+    }
+
+    removeSecret(pos) {
+        if(!this.secrets[pos]) return;
+        // This is also used to set to null synced secrets that may already be null (no change)
+
+        this.secretCards[pos].remove();
+        this.secretCards[pos] = null;
+        this.secrets[pos]     = null;
     }
 
     heal(amt) {
@@ -106,6 +170,7 @@ class Player {
         if(this.currentTile.classList.contains("player" + this.id) && this.hasFlag) {
             this.passFlag(this.sprite, this.currentTile);
             this.flags++; // + eventual ability and game end logic
+            this.hasJustWon = true;
         }
     }
 
@@ -117,6 +182,8 @@ class Player {
         
         await this.moveSprite(path);
         destinationTile.classList.remove("destination");
+
+        if(!this.hasJustWon) this.setIncomingEffect();
     }
 }
 
@@ -142,10 +209,15 @@ function setDestinations(currentTile, steps, prevTile = null, currentPath = []) 
     return isBranching ? paths : paths[0];
 }
 
+const HEROS = {
+    Ganjalf:   SECRETS.Bollard.effect,
+    Babatunde: SECRETS.Load.effect,
+};
+
 let p1, p2, player;
 function setupPlayers() {
-    p1 = new Player(true, "P1");
-    p2 = new Player(false, "P2");
+    p1 = new Player(true, "P1", "Ganjalf");
+    p2 = new Player(false, "P2", "Babatunde");
 
     p1.opponent = p2;
     p2.opponent = p1;

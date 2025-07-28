@@ -11,8 +11,7 @@ client.on("opponent-disconnect", () => {
 });
 
 client.on("pick-hero", isPlayer1 => {
-    setupBoard();
-    setupPlayers();
+    gm.init();
     
     player   = isPlayer1 ? p1 : p2;
     opponent = isPlayer1 ? p2 : p1;
@@ -67,6 +66,13 @@ class LocalGameManager {
         this.turn = 0;
     }
 
+    init() {
+        setupBoard();
+        setupPlayers();
+        p1.proceedBtn.onclick = this.proceed.bind(this);
+        p2.proceedBtn.onclick = this.proceed.bind(this);
+    }
+
     startNewTurn() {
         this.turn++;
         updateBollards();
@@ -74,7 +80,9 @@ class LocalGameManager {
     }
 
     rollDice() {
-        const roll = Math.floor(Math.random() * 3) + 1;
+        const roll = forcedRoll1Turns ? 1 : Math.floor(Math.random() * 3) + 1;
+        if(forcedRoll1Turns) forcedRoll1Turns--;
+
         // Display...
         console.log("rolled a " + roll);
         return roll;
@@ -86,27 +94,24 @@ class LocalGameManager {
 
     async movePlayer(destinationTile) {
         client.emit("opponent-move", player.paths[destinationTile.id].map(tile => tile.id));
-        const oldFlags = player.flags;
         await player.goToDestination(destinationTile);
-        if(oldFlags != player.flags) {
+        if(player.hasJustWon) {
+            player.hasJustWon = false;
             client.emit("game-start");
             return;
         }
 
-        this.affectPlayer(); // why tf is this here?
-        client.emit("proceed", {
-            hp : player.hp,
-            secretsNames : player.secrets.map(secret => secret.name)
-        });
-        gm.startNewTurn();
+        // Now wait for player to respond to effect or click proceed
     }
 
-    affectPlayer() {
-        switch(player.currentTile.style.getPropertyValue("--type")) {
-            case "heal":   player.heal(1); break;
-            case "damage": player.heal(-1); break;
-            case "secret": player.getNewSecret(getRandomSecret()); break;
-        }
+    proceed() { // This is essentially the proceed button's listener
+        player.proceedBtn.style.visibility = "hidden";
+        player.experienceIncomingEffect();
+        client.emit("proceed", {
+            hp : player.hp,
+            secretsNames : player.secrets.map(secret => secret?.name ?? "")
+        });
+        gm.startNewTurn();
     }
 }
 gm = new LocalGameManager();
@@ -116,21 +121,22 @@ gm = new LocalGameManager();
 
 /* Turn checklist:
 identify player that can move -> opponent computes this
-wait: player action
-if: player uses secret ...
-if: player uses ability ...
-if: player rolls
-    roll dice -> inform opponent
-    wait: opponent response
-    if: opponent uses secret ...
-    if: proceed
-        player.computeMoves(roll)
-        wait: player chooses destination -> inform opponent of destination
-        player.goToDestination(dest) -> opponent computes animation
-        wait: player action
-        if: player uses secret ...
-        if: proceed
-            player is affected by destination -> inform opponent of HP, action, secrets, flag position
+wait: player action => if: player uses secret or ability
+    player is affected by secret -> inform opponent of HP, action, secrets, flag position
+    wait: opponent responds
+        if: opponent uses secret or ability
+            opponent is affected by secret (own)
+        
+        opponent is affected by secret -> inform player of everything about opponent
 
+roll dice
+player.computeMoves(roll)
+wait: player chooses destination -> inform opponent of destination
+player.goToDestination(dest) -> opponent computes animation
+player is informed of destination effect
+wait: player action => if: player uses secret (effect response specific)
+    player is affected by secret -> inform opponent of HP, action, secrets, flag position
+
+player is affected by destination -> inform opponent of everything about player
 turn ends -> inform opponent
 */

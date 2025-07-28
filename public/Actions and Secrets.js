@@ -1,5 +1,4 @@
 const BOLLARDS      = {};
-let canPlaceBollard = false;
 function placeBollard(tile) {
     const bollard     = document.createElement("div");
     bollard.className = "bollard";
@@ -31,9 +30,10 @@ function updateBollards() {
 }
 
 class Secret {
-    constructor(name, effect, descr) {
-        this.name   = name;
-        this.effect = effect;
+    constructor(name, effect, descr, canRespond = (effectName) => false) {
+        this.name       = name;
+        this.effect     = effect;
+        this.canRespond = canRespond;
 
         this.card = document.createElement("div");
         this.card.classList.add("secret", "card");
@@ -43,12 +43,30 @@ class Secret {
     }
 
     getCard() { return this.card.cloneNode(true); }
+
+    react(incomingEffectName) {
+        if(this.canRespond(incomingEffectName)) this.effect();
+    }
 }
 
+let canPlaceBollard  = false;
+let forcedRoll1Turns = 0;
 const SECRETS = {
     Bollard: new Secret("Bollard",
         () => canPlaceBollard = true,
         "Place a barrier on any tile which lasts for 3 turns and cannot be crossed."),
+    
+    Load: new Secret("Load",
+        () => forcedRoll1Turns = 3,
+        "Force next 3 opponent rolls to be a 1."),
+    
+    Heal: new Secret("Heal",
+        () => player.heal(1),
+        "Gain +1 HP.", (effectName) => effectName === "Damage"),
+    
+    Damage: new Secret("Damage",
+        () => player.heal(-1),
+        "Inflict -1 HP on opponent."),
 };
 const SECRETS_AMT = Object.keys(SECRETS).length;
 
