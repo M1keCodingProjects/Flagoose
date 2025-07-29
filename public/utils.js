@@ -8,3 +8,8 @@ function areOverlapping(node1, node2) {
         node1BoundingBox.bottom < node2BoundingBox.top    ||
         node1BoundingBox.top    > node2BoundingBox.bottom);
 }
+
+function passFlag(fromNode, toNode) {
+    fromNode.classList.remove("holding-flag");
+    toNode.classList.add("holding-flag");
+}

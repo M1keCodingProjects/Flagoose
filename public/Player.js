@@ -9,6 +9,7 @@ class Player {
         this.ability = HEROS[hero];
         this.secretCards = [null, null, null];
         this.incomingEffectName = "";
+        this.turnHPChange = 0;
         
         const className = "player" + this.id;
         this.sprite = document.createElement("div");
@@ -19,14 +20,16 @@ class Player {
         this.sprite.style.setProperty("background-repeat", "no-repeat");
         board.appendChild(this.sprite);
         
-        this.infoCard          = document.getElementById(className + "-info");
-        this.infoCard.username = this.infoCard.getElementsByClassName("username")[0];
-        this.infoCard.hpBar    = this.infoCard.getElementsByClassName("hp-bar")[0];
-        this.infoCard.secrets  = this.infoCard.getElementsByClassName("secrets")[0];
-        this.infoCard.username.textContent = username;
+        const infoCard = document.getElementById(className + "-info");
+        this.username  = infoCard.getElementsByClassName("username")[0];
+        this.hpBar     = infoCard.getElementsByClassName("hp-bar")[0];
+        this.wonFlags  = [...infoCard.getElementsByClassName("flag-token")];
+        this.secretsCardHolders = infoCard.getElementsByClassName("secrets")[0];
+        this.username.textContent = username;
 
         this.proceedBtn = document.getElementById("proceed-btn-" + this.id); // click listener set by gm
         this.spawnTile  = isPlayer1 ? p1Start : p2Start;
+        this.moveToSpawn(); // Redundant but sets currentTile early (needed for reset)
     }
 
     moveToSpawn() {
@@ -35,14 +38,29 @@ class Player {
     }
 
     reset() {
+        if(this.hasFlag) passFlag(this.sprite, this.hasJustWon ? flagTile : this.currentTile);
+        this.hasJustWon = false;
         this.moveToSpawn();
-        this.heal(5);
-        this.setOpacity(1);
+        this.heal(5); this.heal(-4);
+    }
+
+    tryDie() {
+        if(this.hp > 0) return;
+
+        this.reset();
+        this.removeSecret(0);
+        this.removeSecret(1);
+        this.removeSecret(2);
     }
 
     sync({hp, secretsNames}) {
         this.hp = hp;
-        this.infoCard.hpBar.style.setProperty("--hp", this.hp);
+        if(!hp) {
+            this.tryDie();
+            return;
+        }
+
+        this.hpBar.style.setProperty("--hp", this.hp);
 
         secretsNames.forEach((secretName, i) => {
             if(secretName) this.getNewSecret(SECRETS[secretName], i, false);
@@ -66,17 +84,19 @@ class Player {
         });
 
         if(countResponses) this.proceedBtn.style.visibility = "visible";
-        else this.proceed();
+        else this.proceedBtn.onclick();
     }
 
     experienceIncomingEffect() {
         SECRETS[this.incomingEffectName]?.effect();
         this.incomingEffectName = "";
+        this.heal(this.turnHPChange);
+        this.turnHPChange = 0;
     }
 
     proceed() {
-        this.proceedBtn.onclick();
         this.proceedBtn.style.visibility = "hidden";
+        this.secretCards.forEach(card => card?.classList?.remove("can-respond"));
     }
 
     getNewSecret(secret, pos = this.secrets.indexOf(null), isVisible = true) {
@@ -93,13 +113,11 @@ class Player {
             secret.effect();
             this.removeSecret(pos);
 
-            // Only one response allowed:
-            this.secretCards.forEach(card => card?.classList?.remove("can-respond"));
-            this.proceed();
+            this.proceedBtn.onclick();
         });
 
         this.secretCards[pos] = card;
-        this.infoCard.secrets.children[pos].appendChild(card); // Should always be empty
+        this.secretsCardHolders.children[pos].appendChild(card); // Should always be empty
     }
 
     removeSecret(pos) {
@@ -113,11 +131,9 @@ class Player {
 
     heal(amt) {
         this.hp = Math.min(Math.max(this.hp + amt, 0), 5);
-        this.infoCard.hpBar.style.setProperty("--hp", this.hp);
+        this.hpBar.style.setProperty("--hp", this.hp);
     }
     
-    setOpacity(amt) { this.sprite.style.opacity = amt; }
-
     moveToTile(tile) {
         this.sprite.style.left = tile.style.left;
         this.sprite.style.top  = tile.style.top;
@@ -128,9 +144,6 @@ class Player {
 
         tile.classList.add("destination");
         this.paths[tile.id] = path;
-
-        if(areOverlapping(this.sprite, tile)) this.setOpacity(0.5);
-        if(areOverlapping(this.opponent.sprite, tile)) this.opponent.setOpacity(0.5);
     }
 
     computeMoves(roll) {
@@ -140,15 +153,7 @@ class Player {
 
     get hasFlag() { return this.sprite.classList.contains("holding-flag"); }
 
-    // TODO: this has nothing to do with the player
-    passFlag(fromNode, toNode) {
-        fromNode.classList.remove("holding-flag");
-        toNode.classList.add("holding-flag");
-    }
-
     async moveSprite(path) {
-        this.setOpacity(1);
-        this.opponent.setOpacity(1);
         this.moveToTile(path[0]);
         for(let i = 1; i < path.length; i++) {
             this.sprite.classList.remove('hop');
@@ -158,19 +163,14 @@ class Player {
             await sleep(300);
         }
 
-        if(areOverlapping(this.sprite, this.opponent.sprite)) {
-            this.setOpacity(0.5);
-            this.opponent.setOpacity(0.5);
-        }
-
         this.currentTile = path[path.length - 1];
         if(this.currentTile.classList.contains("holding-flag"))
-            this.passFlag(this.currentTile, this.sprite);
+            passFlag(this.currentTile, this.sprite);
         
         if(this.currentTile.classList.contains("player" + this.id) && this.hasFlag) {
-            this.passFlag(this.sprite, this.currentTile);
-            this.flags++; // + eventual ability and game end logic
-            this.hasJustWon = true;
+            console.log("here", this);
+            this.winGame();
+            // + eventual ability and game end logic
         }
     }
 
@@ -184,6 +184,12 @@ class Player {
         destinationTile.classList.remove("destination");
 
         if(!this.hasJustWon) this.setIncomingEffect();
+    }
+
+    winGame() {
+        this.wonFlags[this.flags].classList.add("full");
+        this.flags++;
+        this.hasJustWon = true;
     }
 }
 

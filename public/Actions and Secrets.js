@@ -61,11 +61,11 @@ const SECRETS = {
         "Force next 3 opponent rolls to be a 1."),
     
     Heal: new Secret("Heal",
-        () => player.heal(1),
+        () => player.turnHPChange++,
         "Gain +1 HP.", (effectName) => effectName === "Damage"),
     
     Damage: new Secret("Damage",
-        () => player.heal(-1),
+        () => player.turnHPChange--,
         "Inflict -1 HP on opponent."),
 };
 const SECRETS_AMT = Object.keys(SECRETS).length;

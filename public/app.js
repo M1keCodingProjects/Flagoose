@@ -6,6 +6,8 @@ client.on("game-full", () => {
 });
 
 client.on("opponent-disconnect", () => {
+    if(matchEnded) return;
+
     document.body.innerHTML = "<div id = \"error-msg\">Your opponent disconnected. Game over.</div>";
     throw new Error("Opponent disconnected");
 });
@@ -31,32 +33,45 @@ client.on("pick-hero", isPlayer1 => {
     if(!isPlayer1) client.emit("game-start");
 });
 
-client.on("game-start", firstToMove => {
+client.on("game-start", async firstToMove => {
+    await opponentMovementAnimation;
+
     p1.reset();
     p2.reset();
 
-    // Returning flag to middle, redundant until we know somehow who won:
-    p1.passFlag(p1.currentTile, flagTile);
-    p2.passFlag(p2.currentTile, flagTile);
-
-    gm.turn = 0;
     // turnId == 0 means you move first:
     p1.turnId = +(firstToMove == 2);
     p2.turnId = +(firstToMove == 1);
     
     console.log("First to move is player " + firstToMove);
-    if(isPlayerTurn()) gm.showPossibleMoves();
+    gm.turn = -1; // It gets updated in startNewTurn
+    gm.startNewTurn();
 });
 
-client.on("opponent-move", async path => {
-    await opponent.moveSprite(path.map(id => TILES[id]));
+let opponentMovementAnimation = Promise.resolve();
+client.on("opponent-move", path => {
+    opponentMovementAnimation = opponent.moveSprite(path.map(id => TILES[id]));
 });
 
-client.on("proceed", data => {
+client.on("proceed", async data => {
+    await opponentMovementAnimation;
+
     console.log("hi", data, player.id, gm.turn);
     opponent.sync(data);
     gm.startNewTurn();
     console.log(gm.turn);
+});
+
+let matchEnded = false;
+client.on("match-end", async winningPlayerId => {
+    await opponentMovementAnimation;
+
+    matchEnded = true;
+    const banner = document.createElement("div");
+    banner.classList.add("banner", winningPlayerId === player.id ? "win" : "lose");
+    document.body.appendChild(banner);
+
+    setTimeout(() => client.disconnect(), 3000);
 });
 
 function isPlayerTurn() { return player.turnId == (gm.turn % 2); }
@@ -96,8 +111,7 @@ class LocalGameManager {
         client.emit("opponent-move", player.paths[destinationTile.id].map(tile => tile.id));
         await player.goToDestination(destinationTile);
         if(player.hasJustWon) {
-            player.hasJustWon = false;
-            client.emit("game-start");
+            client.emit(player.flags < 5 ? "game-start" : "match-end", player.id); // data ignored in game-start
             return;
         }
 
@@ -105,12 +119,13 @@ class LocalGameManager {
     }
 
     proceed() { // This is essentially the proceed button's listener
-        player.proceedBtn.style.visibility = "hidden";
+        player.proceed();
         player.experienceIncomingEffect();
         client.emit("proceed", {
             hp : player.hp,
             secretsNames : player.secrets.map(secret => secret?.name ?? "")
         });
+        player.tryDie(); // Here because this way I can send the 0 hp and synchronize
         gm.startNewTurn();
     }
 }

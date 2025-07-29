@@ -29,9 +29,10 @@ class GameManager {
             return;
         }
 
-        client.on("game-start", this.onGameStart.bind(this));
-        client.on("opponent-move", path => client.broadcast.emit("opponent-move", path));
         client.on("proceed", data => client.broadcast.emit("proceed", data));
+        client.on("opponent-move", path => client.broadcast.emit("opponent-move", path));
+        client.on("game-start", _ => this.server.emit("game-start", this.getFirstToMove()));
+        client.on("match-end", winningPlayerId => this.server.emit("match-end", winningPlayerId));
         
         const isPlayer1 = this.p1 === null;
         this[isPlayer1 ? "p1" : "p2"] = client;
@@ -44,10 +45,6 @@ class GameManager {
     }
 
     get isPlayersTurn() { return this.turn % 2 == (player.turnId); }
-
-    onGameStart() {
-        this.server.emit("game-start", this.getFirstToMove());
-    }
 
     getFirstToMove() { return 1 + (Math.random() >= 0.5); }
 
