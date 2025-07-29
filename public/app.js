@@ -96,7 +96,7 @@ class LocalGameManager {
     }
 
     rollDice() {
-        const roll = forcedRoll1Turns ? 1 : Math.floor(Math.random() * 3) + 1;
+        const roll = forcedRoll1Turns ? 1 : getRandomIndex(3) + 1; // A number between 1 and 3
         if(forcedRoll1Turns) forcedRoll1Turns--;
 
         // Display...

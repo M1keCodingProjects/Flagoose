@@ -70,14 +70,28 @@ class Player {
         this.isTrapped = isTrapped;
     }
 
-    setIncomingEffect() {
+    async setIncomingEffect() {
+        let itWasAction = false;
         switch(this.currentTile.style.getPropertyValue("--type")) {
-            case "heal":   this.incomingEffectName = "Heal";       break;
-            case "damage": this.incomingEffectName = "Damage";     break;
-            case "trap":   this.incomingEffectName = "Trap";       break;
-            case "secret": player.getNewSecret(getRandomSecret()); break;
+            case "heal":   this.incomingEffectName = "Heal";     break;
+            case "damage": this.incomingEffectName = "Damage";   break;
+            case "trap":   this.incomingEffectName = "Trap";     break;
+            case "secret": this.getNewSecret(getRandomSecret()); break;
+            case "action":
+                itWasAction  = true;
+                const action = getRandomAction();
+                this.incomingEffectName = action.name;
+                
+                const card = action.getCard();
+                displayActionCard(card);
+                // setup overlay to show card
+                await new Promise(resolve => card.addEventListener("click", () => {
+                    card.parentNode.remove();
+                    resolve();
+                }));
+                break;
         }
-        SECRETS[this.incomingEffectName]?.effect();
+        (itWasAction ? ACTIONS : SECRETS)[this.incomingEffectName]?.effect();
 
         let countResponses = 0;
         this.secrets.forEach((secret, i) => {
@@ -182,7 +196,7 @@ class Player {
         await this.moveSprite(path);
         destinationTile.classList.remove("destination");
 
-        if(!this.hasJustWon) this.setIncomingEffect();
+        if(!this.hasJustWon) await this.setIncomingEffect();
     }
 
     winGame() {

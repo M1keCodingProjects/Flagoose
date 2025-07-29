@@ -13,3 +13,5 @@ function passFlag(fromNode, toNode) {
     fromNode.classList.remove("holding-flag");
     toNode.classList.add("holding-flag");
 }
+
+function getRandomIndex(upTo) { return Math.floor(Math.random() * upTo); }

@@ -532,7 +532,7 @@ body {
     color: #504237;
 }
 
-/*--------------------------------------Match End---------------------------------------*/
+/*--------------------------------------Overlays----------------------------------------*/
 .banner {
     position: absolute;
     top: 0;
@@ -546,8 +546,9 @@ body {
     z-index: 999 !important;
 }
 
-.banner.win, .banner.lose {
+.banner.win, .banner.lose, .banner.action {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
 }
@@ -564,4 +565,10 @@ body {
 
 .banner.lose::after {
     content: "You Lose...";
+}
+
+.banner.action::before {
+    font-size: 2rem;
+    color: #161516;
+    content: "You got hit by:"
 }
