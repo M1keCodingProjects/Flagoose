@@ -9,7 +9,6 @@ class Player {
         this.ability = HEROS[hero];
         this.secretCards = [null, null, null];
         this.incomingEffectName = "";
-        this.turnHPChange = 0;
         
         const className = "player" + this.id;
         this.sprite = document.createElement("div");
@@ -40,8 +39,9 @@ class Player {
     reset() {
         if(this.hasFlag) passFlag(this.sprite, this.hasJustWon ? flagTile : this.currentTile);
         this.hasJustWon = false;
+        this.isTrapped  = false;
         this.moveToSpawn();
-        this.heal(5); this.heal(-4);
+        this.heal(5);
     }
 
     tryDie() {
@@ -53,7 +53,7 @@ class Player {
         this.removeSecret(2);
     }
 
-    sync({hp, secretsNames}) {
+    sync({hp, secretsNames, isTrapped}) {
         this.hp = hp;
         if(!hp) {
             this.tryDie();
@@ -66,15 +66,19 @@ class Player {
             if(secretName) this.getNewSecret(SECRETS[secretName], i, false);
             else this.removeSecret(i);
         });
+
+        this.isTrapped = isTrapped;
     }
 
     setIncomingEffect() {
         switch(this.currentTile.style.getPropertyValue("--type")) {
             case "heal":   this.incomingEffectName = "Heal";       break;
             case "damage": this.incomingEffectName = "Damage";     break;
+            case "trap":   this.incomingEffectName = "Trap";       break;
             case "secret": player.getNewSecret(getRandomSecret()); break;
         }
-        
+        SECRETS[this.incomingEffectName]?.effect();
+
         let countResponses = 0;
         this.secrets.forEach((secret, i) => {
             if(!secret?.canRespond(this.incomingEffectName)) return;
@@ -82,16 +86,10 @@ class Player {
             this.secretCards[i].classList.add("can-respond");
             countResponses++;
         });
+        this.incomingEffectName = "";
 
         if(countResponses) this.proceedBtn.style.visibility = "visible";
         else this.proceedBtn.onclick();
-    }
-
-    experienceIncomingEffect() {
-        SECRETS[this.incomingEffectName]?.effect();
-        this.incomingEffectName = "";
-        this.heal(this.turnHPChange);
-        this.turnHPChange = 0;
     }
 
     proceed() {
@@ -129,6 +127,7 @@ class Player {
         this.secrets[pos]     = null;
     }
 
+    // hp state can be invalid (0) through this method, it's intentional to allow responses after effects
     heal(amt) {
         this.hp = Math.min(Math.max(this.hp + amt, 0), 5);
         this.hpBar.style.setProperty("--hp", this.hp);

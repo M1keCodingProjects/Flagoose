@@ -49,8 +49,8 @@ class Secret {
     }
 }
 
-let canPlaceBollard  = false;
-let forcedRoll1Turns = 0;
+let canPlaceBollard   = false;
+let forcedRoll1Turns  = 0;
 const SECRETS = {
     Bollard: new Secret("Bollard",
         () => canPlaceBollard = true,
@@ -61,12 +61,20 @@ const SECRETS = {
         "Force next 3 opponent rolls to be a 1."),
     
     Heal: new Secret("Heal",
-        () => player.turnHPChange++,
+        () => player.heal(1),
         "Gain +1 HP.", (effectName) => effectName === "Damage"),
     
     Damage: new Secret("Damage",
-        () => player.turnHPChange--,
+        () => player.heal(-1),
         "Inflict -1 HP on opponent."),
+
+    Trap: new Secret("Trap",
+        () => player.isTrapped = true,
+        "Force opponent to skip a turn."),
+
+    Bail: new Secret("Bail",
+        () => player.isTrapped = false,
+        "Escape entrapment.", (effectName) => effectName === "Trap"),
 };
 const SECRETS_AMT = Object.keys(SECRETS).length;
 

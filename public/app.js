@@ -56,7 +56,7 @@ client.on("opponent-move", path => {
 client.on("proceed", async data => {
     await opponentMovementAnimation;
 
-    console.log("hi", data, player.id, gm.turn);
+    console.log("hi", data, player.id, gm.turn, player.isTrapped);
     opponent.sync(data);
     gm.startNewTurn();
     console.log(gm.turn);
@@ -90,6 +90,7 @@ class LocalGameManager {
 
     startNewTurn() {
         this.turn++;
+        player.isTrapped = false;
         updateBollards();
         if(isPlayerTurn()) this.showPossibleMoves();
     }
@@ -120,13 +121,18 @@ class LocalGameManager {
 
     proceed() { // This is essentially the proceed button's listener
         player.proceed();
-        player.experienceIncomingEffect();
-        client.emit("proceed", {
+        
+        // When turn is updated by startNewTurn it's still player's turn:
+        if(opponent.isTrapped && !player.isTrapped) gm.turn--;
+        else client.emit("proceed", {
             hp : player.hp,
-            secretsNames : player.secrets.map(secret => secret?.name ?? "")
+            secretsNames : player.secrets.map(secret => secret?.name ?? ""),
+            isTrapped : player.isTrapped,
         });
+        opponent.isTrapped = false;
+        
         player.tryDie(); // Here because this way I can send the 0 hp and synchronize
-        gm.startNewTurn();
+        this.startNewTurn();
     }
 }
 gm = new LocalGameManager();
