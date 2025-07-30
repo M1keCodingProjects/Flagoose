@@ -54,6 +54,7 @@ body {
     justify-content: center;
     align-items: self-end;
     overflow: hidden;
+    background: rgb(56, 139, 162);
 }
 
 /*----------------------------------------Fonts-----------------------------------------*/
@@ -178,6 +179,7 @@ body {
 /*------------------------------------Hovering stuff------------------------------------*/
 .tile.destination {
     box-shadow: 0 0 5px 5px blanchedalmond;
+    cursor: pointer;
 }
 
 .tile.destination::after, .holding-flag::after {
@@ -482,6 +484,7 @@ body {
 .secret.card[data-is-visible = "true"] {
     background: linear-gradient(to bottom, #370e5b, #2a162e);
     visibility: visible; /* Just to be sure. */
+    cursor: pointer;
 }
 
 .secret.card[data-is-visible = "false"] {

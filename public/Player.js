@@ -84,7 +84,6 @@ class Player {
                 
                 const card = action.getCard();
                 displayActionCard(card);
-                // setup overlay to show card
                 await new Promise(resolve => card.addEventListener("click", () => {
                     card.parentNode.remove();
                     resolve();
