@@ -29,7 +29,10 @@ class GameManager {
             return;
         }
 
+        client.on("effect", data => client.broadcast.emit("effect", data));
+        client.on("effect-solved", data => client.broadcast.emit("effect-solved", data));
         client.on("proceed", data => client.broadcast.emit("proceed", data));
+        client.on("trapped-sync", data => client.broadcast.emit("trapped-sync", data));
         client.on("opponent-move", path => client.broadcast.emit("opponent-move", path));
         client.on("game-start", _ => this.server.emit("game-start", this.getFirstToMove()));
         client.on("match-end", winningPlayerId => this.server.emit("match-end", winningPlayerId));

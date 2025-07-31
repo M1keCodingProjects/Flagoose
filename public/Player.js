@@ -39,7 +39,7 @@ class Player {
     reset() {
         if(this.hasFlag) passFlag(this.sprite, this.hasJustWon ? flagTile : this.currentTile);
         this.hasJustWon = false;
-        this.isTrapped  = false;
+        this.isTrapped  = false; // By design resetting (any kind) eliminates trapping
         this.moveToSpawn();
         this.heal(5);
     }
@@ -71,38 +71,42 @@ class Player {
     }
 
     async setIncomingEffect() {
-        let itWasAction = false;
+        let incomingEffectName = "";
         switch(this.currentTile.style.getPropertyValue("--type")) {
-            case "heal":   this.incomingEffectName = "Heal";     break;
-            case "damage": this.incomingEffectName = "Damage";   break;
-            case "trap":   this.incomingEffectName = "Trap";     break;
-            case "secret": this.getNewSecret(getRandomSecret()); break;
+            case "heal":   incomingEffectName = "Heal";   break;
+            case "damage": incomingEffectName = "Damage"; break;
+            case "trap":   incomingEffectName = "Trap";   break;
+            case "secret":
+                this.getNewSecret(getRandomSecret());
+                this.proceedBtn.click(); return;
+            
             case "action":
-                itWasAction  = true;
                 const action = getRandomAction();
-                this.incomingEffectName = action.name;
+                incomingEffectName = action.name;
                 
                 const card = action.getCard();
                 displayActionCard(card);
                 await new Promise(resolve => card.addEventListener("click", () => {
                     card.parentNode.remove();
                     resolve();
-                }));
-                break;
+                })); break;
         }
-        (itWasAction ? ACTIONS : SECRETS)[this.incomingEffectName]?.effect();
+        ACTIONS[incomingEffectName]?.effect(this, this.opponent);
+        console.log("End turn shenanigans: ", incomingEffectName, this.isTrapped);
+        this.setResponses(incomingEffectName);
+    }
 
+    setResponses(effectName) {
         let countResponses = 0;
         this.secrets.forEach((secret, i) => {
-            if(!secret?.canRespond(this.incomingEffectName)) return;
+            if(!secret?.canRespond(effectName)) return;
 
             this.secretCards[i].classList.add("can-respond");
             countResponses++;
         });
-        this.incomingEffectName = "";
 
         if(countResponses) this.proceedBtn.style.visibility = "visible";
-        else this.proceedBtn.onclick();
+        else this.proceedBtn.click();
     }
 
     proceed() {
@@ -118,13 +122,25 @@ class Player {
         this.secrets[pos] = secret;
         const card = secret.getCard();
         card.dataset.isVisible = isVisible;
-        if(isVisible) card.addEventListener("click", () => {
-            if(!card.classList.contains("can-respond")) return;
+        if(isVisible) card.addEventListener("click", async () => {
+            let sendingEffect = false;
+            if(gm.phase == GAME_PHASES.turnStart && isPlayerTurn()) {
+                gm.phase = GAME_PHASES.solvingEffects;
+                sendingEffect = true;
+            }
+            else if(!card.classList.contains("can-respond")) return;
             
-            secret.effect();
-            this.removeSecret(pos);
+            this.removeSecret(pos); // Do this before the effect so a "spawning new secret" effect can happen with full holders
+            const maybePromise = secret.effect(this, this.opponent);
+            if(maybePromise instanceof Promise) await maybePromise;
 
-            this.proceedBtn.onclick();
+            if(sendingEffect) {
+                console.log("sending effect:", this);
+                gm.sendEffect(pos);
+                return;
+            }
+            
+            this.proceedBtn.click();
         });
 
         this.secretCards[pos] = card;
@@ -156,6 +172,13 @@ class Player {
 
         tile.classList.add("destination");
         this.paths[tile.id] = path;
+    }
+
+    removeBlockedPaths(blockedTile) { // We don't actually need to remove the paths
+        for(const tiles of this.paths) {
+            if(tiles.includes(blockedTile))
+                tiles[tiles.length - 1].classList.remove("destination");
+        }
     }
 
     computeMoves(roll) {

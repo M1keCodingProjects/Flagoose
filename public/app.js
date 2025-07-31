@@ -21,12 +21,12 @@ client.on("pick-hero", isPlayer1 => {
     
     TILES.forEach(tile => tile.addEventListener("click", _=> {
         if(canPlaceBollard) {
-            placeBollard(tile);
+            placeBollard(player.id, tile);
             canPlaceBollard = false;
             return;
         }
 
-        if(tile.classList.contains("destination")) gm.movePlayer(tile);
+        if(tile.classList.contains("destination") && gm.phase != "solving effects") gm.movePlayer(tile);
     }));
 
     // Select heros n stuff...
@@ -48,6 +48,25 @@ client.on("game-start", async firstToMove => {
     gm.startNewTurn();
 });
 
+client.on("effect", data => {
+    console.log("effect received: ", data);
+    gm.phase = GAME_PHASES.solvingEffects;
+    player.proceedBtn.addEventListener("click", () => opponent.sync(data), { once: true });
+
+    const usedSecret = opponent.secrets[data.usedSecretPos]; console.log(usedSecret);
+    opponent.secretCards[data.usedSecretPos].dataset.isVisible = true;
+    SECRETS[usedSecret.name].effect(opponent, player);
+
+    if(data.newBollardTileId !== null) placeBollard(opponent.id, TILES[data.newBollardTileId]);
+    player.setResponses(usedSecret.name);
+});
+
+client.on("effect-solved", data => {
+    console.log("effect solved: ", data);
+    opponent.sync(data);
+    gm.phase = GAME_PHASES.moving;
+});
+
 let opponentMovementAnimation = Promise.resolve();
 client.on("opponent-move", path => {
     opponentMovementAnimation = opponent.moveSprite(path.map(id => TILES[id]));
@@ -60,6 +79,12 @@ client.on("proceed", async data => {
     opponent.sync(data);
     gm.startNewTurn();
     console.log(gm.turn);
+});
+
+client.on("trapped-sync", data => {
+    opponent.sync(data);
+    player.isTrapped = false;
+    gm.phase = GAME_PHASES.moving;
 });
 
 let matchEnded = false;
@@ -76,23 +101,32 @@ client.on("match-end", async winningPlayerId => {
 
 function isPlayerTurn() { return player.turnId == (gm.turn % 2); }
 
+const GAME_PHASES = {
+    turnStart: "turn start",
+    solvingEffects: "solving effects",
+    moving: "moving",
+};
 class LocalGameManager {
     constructor() {
-        this.turn = 0;
+        this.turn  = 0;
+        this.phase = GAME_PHASES.turnStart;
     }
 
     init() {
         setupBoard();
         setupPlayers();
-        p1.proceedBtn.onclick = this.proceed.bind(this);
-        p2.proceedBtn.onclick = this.proceed.bind(this);
+        p1.proceedBtn.addEventListener("click", this.proceed.bind(this));
+        p2.proceedBtn.addEventListener("click", this.proceed.bind(this));
     }
 
     startNewTurn() {
         this.turn++;
-        player.isTrapped = false;
+        this.phase = GAME_PHASES.turnStart;
         updateBollards();
-        if(isPlayerTurn()) this.showPossibleMoves();
+        if(!isPlayerTurn()) return;
+
+        this.showPossibleMoves();
+        player.isTrapped = false;
     }
 
     rollDice() {
@@ -109,6 +143,7 @@ class LocalGameManager {
     }
 
     async movePlayer(destinationTile) {
+        this.phase = GAME_PHASES.moving;
         client.emit("opponent-move", player.paths[destinationTile.id].map(tile => tile.id));
         await player.goToDestination(destinationTile);
         if(player.hasJustWon) {
@@ -119,16 +154,38 @@ class LocalGameManager {
         // Now wait for player to respond to effect or click proceed
     }
 
-    proceed() { // This is essentially the proceed button's listener
-        player.proceed();
-        
-        // When turn is updated by startNewTurn it's still player's turn:
-        if(opponent.isTrapped && !player.isTrapped) gm.turn--;
-        else client.emit("proceed", {
+    sendEffect(usedSecretPos) {
+        client.emit("effect", {
             hp : player.hp,
             secretsNames : player.secrets.map(secret => secret?.name ?? ""),
             isTrapped : player.isTrapped,
+            usedSecretPos,
+            newBollardTileId,
         });
+    }
+
+    proceed() { // This is essentially the proceed button's listener
+        player.proceed();
+        const playerData = {
+            hp : player.hp,
+            secretsNames : player.secrets.map(secret => secret?.name ?? ""),
+            isTrapped : player.isTrapped,
+        };
+
+        if(this.phase == GAME_PHASES.solvingEffects) {
+            client.emit("effect-solved", playerData);
+            player.tryDie();
+            return;
+        }
+
+        // When turn is updated by startNewTurn it's still player's turn:
+        let msg = "proceed";
+        console.log(opponent.isTrapped, player.isTrapped);
+        if(opponent.isTrapped && !player.isTrapped) {
+            gm.turn--;
+            msg = "trapped-sync";
+        }
+        client.emit(msg, playerData);
         opponent.isTrapped = false;
         
         player.tryDie(); // Here because this way I can send the 0 hp and synchronize
@@ -142,22 +199,27 @@ gm = new LocalGameManager();
 
 /* Turn checklist:
 identify player that can move -> opponent computes this
-wait: player action => if: player uses secret or ability
-    player is affected by secret -> inform opponent of HP, action, secrets, flag position
-    wait: opponent responds
-        if: opponent uses secret or ability
-            opponent is affected by secret (own)
-        
-        opponent is affected by secret -> inform player of everything about opponent
-
 roll dice
 player.computeMoves(roll)
-wait: player chooses destination -> inform opponent of destination
-player.goToDestination(dest) -> opponent computes animation
-player is informed of destination effect
-wait: player action => if: player uses secret (effect response specific)
-    player is affected by secret -> inform opponent of HP, action, secrets, flag position
+wait: player action
+    if: player uses secret or ability
+        player is affected by secret -> inform opponent of HP, action, secrets, flag position
+        opponent is affected by secret
+        wait: opponent responds
+            if: opponent uses secret or ability
+                opponent is affected by secret (own)
+        
+        -> inform player of everything about opponent
 
-player is affected by destination -> inform opponent of everything about player
+    if: player chooses destination
+        player.goToDestination(dest) -> opponent computes animation
+        player is affected by destination
+        wait: player action
+            if: player clicks proceed or has no response => nothing
+            if: player uses secret (effect response specific)
+                player is affected by secret
+        
+        -> inform opponent of HP, action, secrets, flag position
+
 turn ends -> inform opponent
 */

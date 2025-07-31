@@ -199,9 +199,8 @@ body {
     height: calc(var(--tile-w) * 1.2);
 }
 
-.sprite.holding-flag {
-    z-index: 4;
-}
+.tile.holding-flag   { z-index: 1; }
+.sprite.holding-flag { z-index: 4; }
 
 .sprite.holding-flag::after {
     --tx: 26%;
@@ -516,6 +515,7 @@ body {
 
 .bollard {
     position: absolute;
+    background-color: transparent; /* Override style set by .player classes */
     background-image: url("./assets/bollard.svg");
     background-size: contain;
     background-repeat: no-repeat;
@@ -532,8 +532,10 @@ body {
     left: 40%;
     top: 30%;
     font-weight: bold;
-    color: #504237;
 }
+
+.bollard.player1::before { color: var(--p1-col); }
+.bollard.player2::before { color: var(--p2-col); }
 
 /*--------------------------------------Overlays----------------------------------------*/
 .banner {

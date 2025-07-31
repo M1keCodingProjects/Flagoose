@@ -1,7 +1,10 @@
-const BOLLARDS      = {};
-function placeBollard(tile) {
-    const bollard     = document.createElement("div");
-    bollard.className = "bollard";
+let bollardIsPlaced;
+let newBollardTileId = null;
+const BOLLARDS = {};
+function placeBollard(playerId, tile) {
+    newBollardTileId = tile.id;
+    const bollard    = document.createElement("div");
+    bollard.classList.add("bollard", "player" + playerId);
     bollard.id = "bollard" + tile.id;
     bollard.dataset.turnsLeft = "3";
 
@@ -11,6 +14,9 @@ function placeBollard(tile) {
     bollard.style.top  = tile.style.top;
 
     tile.classList.add("blocked");
+    tile.classList.remove("destination");
+    player.removeBlockedPaths(tile);
+    bollardIsPlaced?.(); // Resolving a promise waiting for bollard placement
 }
 
 function removeBollard(id) {
@@ -21,8 +27,12 @@ function removeBollard(id) {
 }
 
 function updateBollards() {
+    newBollardTileId = null; // This function is called at the beginning of a new turn so this fits here
     for(const id in BOLLARDS) {
         const bollard = BOLLARDS[id];
+        if(isPlayerTurn() + bollard.classList.contains("player" + player.id) == 1) continue;
+        // ^^^ At the start of MY turn (when this runs) YOUR turn has ended so MY bollards tick down.
+
         const turnsLeft = bollard.dataset.turnsLeft - 1;
         bollard.dataset.turnsLeft = "" + turnsLeft;
         if(!turnsLeft) removeBollard(id);
@@ -43,42 +53,43 @@ class Effect {
     }
 
     getCard() { return this.card.cloneNode(true); }
-
-    react(incomingEffectName) {
-        if(this.canRespond(incomingEffectName)) this.effect();
-    }
 }
 
 let canPlaceBollard   = false;
 let forcedRoll1Turns  = 0;
 const SECRETS = {
     Bollard: new Effect("Bollard",
-        () => canPlaceBollard = true,
-        "Place a barrier on any tile which lasts for 3 turns and cannot be crossed."),
+        async (sender, receiver) => {
+            if(!isPlayerTurn()) return;
+
+            canPlaceBollard = true;
+            await new Promise(success => bollardIsPlaced = success);
+        },
+        "Place a barrier on any tile, blocking the opponent from crossing for 3 of their turns."),
     
     Load: new Effect("Load",
-        () => forcedRoll1Turns = 3,
+        (sender, receiver) => forcedRoll1Turns = 3 * !isPlayerTurn(),
         "Force next 3 opponent rolls to be a 1."),
     
     Heal: new Effect("Heal",
-        () => player.heal(1),
+        (sender, receives) => sender.heal(1),
         "Gain +1 HP.", (effectName) => effectName === "Damage"),
     
     Damage: new Effect("Damage",
-        () => player.heal(-1),
+        (sender, receiver) => receiver.heal(-1),
         "Inflict -1 HP on opponent."),
 
     Trap: new Effect("Trap",
-        () => player.isTrapped = true,
+        (sender, receiver) => receiver.isTrapped = true,
         "Force opponent to skip a turn."),
 
     Bail: new Effect("Bail",
-        () => player.isTrapped = false,
+        (sender, receiver) => sender.isTrapped = false,
         "Escape entrapment.", (effectName) => effectName === "Trap"),
 };
 const SECRETS_AMT = Object.keys(SECRETS).length;
 
-function getRandomSecret() {
+function getRandomSecret() {return [SECRETS.Damage, SECRETS.Heal][getRandomIndex(2)];
     return Object.values(SECRETS)[getRandomIndex(SECRETS_AMT)];
 }
 
@@ -96,11 +107,11 @@ function onPapercutAction() {
 const ACTIONS = {
     Heal: SECRETS.Heal,
     Damage: new Effect("Damage",
-        SECRETS.Damage.effect,
+        () => player.heal(-1),
         "Lose 1 HP."),
 
     Trap: new Effect("Trap",
-        SECRETS.Trap.effect,
+        () => player.isTrapped = true,
         "Skip a turn."),
 
     Nothing: new Effect("Nothing", () => {}, "Nothing happens."),
@@ -108,7 +119,7 @@ const ACTIONS = {
 }
 const ACTIONS_AMT = Object.keys(ACTIONS).length;
 
-function getRandomAction() {
+function getRandomAction() {return ACTIONS.Trap;
     return Object.values(ACTIONS)[getRandomIndex(ACTIONS_AMT)];
 }
 
