@@ -17,7 +17,7 @@ client.on("pick-hero", isPlayer1 => {
     
     player   = isPlayer1 ? p1 : p2;
     opponent = isPlayer1 ? p2 : p1;
-    console.log("I am player " + (1 + !isPlayer1));
+    console.log("New match started, I am player " + (1 + !isPlayer1));
     
     TILES.forEach(tile => tile.addEventListener("click", _=> {
         if(canPlaceBollard) {
@@ -43,7 +43,7 @@ client.on("game-start", async firstToMove => {
     p1.turnId = +(firstToMove == 2);
     p2.turnId = +(firstToMove == 1);
     
-    console.log("First to move is player " + firstToMove);
+    console.log("New game in match: first to move is player " + firstToMove);
     gm.turn = -1; // It gets updated in startNewTurn
     gm.startNewTurn();
 });
@@ -75,10 +75,10 @@ client.on("opponent-move", path => {
 client.on("proceed", async data => {
     await opponentMovementAnimation;
 
-    console.log("hi", data, player.id, gm.turn, player.isTrapped);
+    console.log("Opponent ended its turn(" + gm.turn + "), with data: ", data);
     opponent.sync(data);
     gm.startNewTurn();
-    console.log(gm.turn);
+    console.log("And now the turn is: " + gm.turn);
 });
 
 client.on("trapped-sync", data => {
@@ -169,8 +169,13 @@ class LocalGameManager {
         updateBollards();
         if(!isPlayerTurn()) return;
 
-        this.showPossibleMoves();
+        if(!player.isTrapped) {
+            this.showPossibleMoves();
+            return;
+        }
+        
         player.isTrapped = false;
+        this.proceed();
     }
 
     rollDice() {
@@ -230,16 +235,8 @@ class LocalGameManager {
             return;
         }
 
-        // When turn is updated by startNewTurn it's still player's turn:
-        let msg = "proceed";
-        console.log(opponent.isTrapped, player.isTrapped);
-        if(opponent.isTrapped && !player.isTrapped) {
-            gm.turn--;
-            msg = "trapped-sync";
-        }
-        client.emit(msg, playerData);
-        opponent.isTrapped = false;
-        
+        client.emit("proceed", playerData);
+
         player.tryDie(); // Here because this way I can send the 0 hp and synchronize
         this.startNewTurn();
     }

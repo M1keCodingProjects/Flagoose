@@ -89,7 +89,7 @@ const SECRETS = {
 };
 const SECRETS_AMT = Object.keys(SECRETS).length;
 
-function getRandomSecret() {//return SECRETS.Damage;
+function getRandomSecret() {
     return Object.values(SECRETS)[getRandomIndex(SECRETS_AMT)];
 }
 
@@ -119,7 +119,7 @@ const ACTIONS = {
 }
 const ACTIONS_AMT = Object.keys(ACTIONS).length;
 
-function getRandomAction() {//return ACTIONS.Trap;
+function getRandomAction() {
     return Object.values(ACTIONS)[getRandomIndex(ACTIONS_AMT)];
 }
 
