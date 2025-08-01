@@ -104,7 +104,8 @@ class Player {
             countResponses++;
         });
 
-        if(countResponses) this.proceedBtn.style.visibility = "visible";
+        // vvv Manual proceed when not your turn (this method is always called on player)
+        if(countResponses || !isPlayerTurn()) this.proceedBtn.style.visibility = "visible";
         else this.proceedBtn.click();
     }
 

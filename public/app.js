@@ -242,33 +242,3 @@ class LocalGameManager {
     }
 }
 gm = new LocalGameManager();
-
-// Sending playerMove from the client to the server
-//socket.emit("playerMove", {} /*data*/);
-
-/* Turn checklist:
-identify player that can move -> opponent computes this
-roll dice
-player.computeMoves(roll)
-wait: player action
-    if: player uses secret or ability
-        player is affected by secret -> inform opponent of HP, action, secrets, flag position
-        opponent is affected by secret
-        wait: opponent responds
-            if: opponent uses secret or ability
-                opponent is affected by secret (own)
-        
-        -> inform player of everything about opponent
-
-    if: player chooses destination
-        player.goToDestination(dest) -> opponent computes animation
-        player is affected by destination
-        wait: player action
-            if: player clicks proceed or has no response => nothing
-            if: player uses secret (effect response specific)
-                player is affected by secret
-        
-        -> inform opponent of HP, action, secrets, flag position
-
-turn ends -> inform opponent
-*/
