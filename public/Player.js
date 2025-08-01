@@ -5,6 +5,7 @@ class Player {
         this.id = 1 + !isPlayer1;
         this.hp = 5;
         this.flags = 0;
+        this.hero = hero;
         this.secrets = [null, null, null];
         this.ability = HEROS[hero];
         this.secretCards = [null, null, null];
@@ -14,9 +15,6 @@ class Player {
         this.sprite = document.createElement("div");
         this.sprite.id = className + "-sprite";
         this.sprite.classList.add(className, "sprite", hero);
-        this.sprite.style.setProperty("background", `url(./assets/${hero}-${this.id}.svg)`);
-        this.sprite.style.setProperty("background-size", "contain");
-        this.sprite.style.setProperty("background-repeat", "no-repeat");
         board.appendChild(this.sprite);
         
         const infoCard = document.getElementById(className + "-info");
@@ -34,6 +32,7 @@ class Player {
     moveToSpawn() {
         this.moveToTile(this.spawnTile);
         this.currentTile = this.spawnTile;
+        this.evalTileEffect();
     }
 
     reset() {
@@ -175,7 +174,7 @@ class Player {
     }
 
     removeBlockedPaths(blockedTile) { // We don't actually need to remove the paths
-        for(const tiles of this.paths) {
+        for(const tiles of Object.values(this.paths)) {
             if(tiles.includes(blockedTile))
                 tiles[tiles.length - 1].classList.remove("destination");
         }
@@ -199,13 +198,22 @@ class Player {
         }
 
         this.currentTile = path[path.length - 1];
+        if(this.currentTile === this.opponent.currentTile) {
+            this.isReadyToFight = true;
+            return;
+        }
+
+        this.evalTileEffect();
+    }
+
+    evalTileEffect() {
         if(this.currentTile.classList.contains("holding-flag"))
             passFlag(this.currentTile, this.sprite);
         
         if(this.currentTile.classList.contains("player" + this.id) && this.hasFlag) {
             console.log("here", this);
             this.winGame();
-            // + eventual ability and game end logic
+            // + eventual ability
         }
     }
 
@@ -217,6 +225,12 @@ class Player {
         
         await this.moveSprite(path);
         destinationTile.classList.remove("destination");
+
+        if(this.isReadyToFight) {
+            await gm.fight();
+            // Even if we die technically everything after is based on the spawn tile and flow goes to proceed as normal
+            this.evalTileEffect();
+        } // Intended fallthrough
 
         if(!this.hasJustWon) await this.setIncomingEffect();
     }

@@ -87,6 +87,50 @@ client.on("trapped-sync", data => {
     gm.phase = GAME_PHASES.moving;
 });
 
+client.on("fight-start", () => {
+    drawCombatOverlay();
+    confirmBtn.onclick = () => {
+        if(hasConfirmed) return;
+
+        hasConfirmed = true;
+        confirmBtn.style.opacity = 0.5;
+        client.emit("fight", {
+            pId       : player.id,
+            swordPos  : playerSetup.swordPos,
+            shieldPos : playerSetup.shieldPos,
+        });
+    };
+});
+
+client.on("fight", ({ swordPos, shieldPos }) => {
+    opponentSetup.clearItems();
+    opponentSetup.createItem("sword", swordPos);
+    opponentSetup.createItem("shield", shieldPos);
+
+    player.heal(-(swordPos !== playerSetup.shieldPos));
+    opponent.heal(-(shieldPos !== playerSetup.swordPos));
+    if(!player.hp || !opponent.hp) {
+        // To be extra sure this ^^^ is the full guard for making the btn available again
+        if(isPlayerTurn()) client.emit("fight-ended"); // Here the if to avoid both clients emitting this
+    }
+    else {
+        confirmBtn.style.opacity = 1;
+        hasConfirmed = false;
+    }
+
+    player.tryDie();
+    opponent.tryDie();
+});
+
+let fightingProcess; // Promise resolver
+client.on("fight-ended", () => {
+    console.log("fight ended for player " + player.id);
+    removeCombatOverlay();
+    if(isPlayerTurn()) fightingProcess();
+    else if(opponent.currentTile !== opponent.spawnTile) opponent.evalTileEffect();
+    // ^^^ Allowing the opponent to auto-sync picking up the flag but protecting from double winning
+});
+
 let matchEnded = false;
 client.on("match-end", async winningPlayerId => {
     await opponentMovementAnimation;
@@ -152,6 +196,14 @@ class LocalGameManager {
         }
 
         // Now wait for player to respond to effect or click proceed
+    }
+
+    async fight() {
+        player.isReadyToFight   = false;
+        opponent.isReadyToFight = false;
+
+        client.emit("fight-start");
+        await new Promise(success => fightingProcess = success);
     }
 
     sendEffect(usedSecretPos) {

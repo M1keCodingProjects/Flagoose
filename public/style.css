@@ -5,6 +5,7 @@
 
 * {
     margin: 0;
+    user-select: none;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -94,6 +95,8 @@ body {
 /*----------------------------------------Tiles-----------------------------------------*/
 :root {
     --tile-w: 3rem;
+    --p1-col: #1f80da;
+    --p2-col: #be2f0e;
 }
 
 #board {
@@ -108,18 +111,23 @@ body {
     position: absolute;
     width:  var(--tile-w);
     height: var(--tile-w);
-    background: #c7b3a3;
+    /*background-image: url("./assets/Tile.svg");
+    background-size: contain;
+    background-repeat: no-repeat;*/
     color: white;
     font-weight: bold;
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 8px;
+    /* Remove these vvv for image bg */
+    background: #c7b3a3;
     transform: rotate(var(--tile-rotation)); /*defined on creation*/
 }
 
 .tile:hover {
-    border: 5px solid blanchedalmond;
+    /*border: 5px solid blanchedalmond;*/
+    transform: scale(1.2) rotate(var(--tile-rotation));
 }
 
 .tile.start::before {
@@ -180,6 +188,7 @@ body {
 .tile.destination {
     box-shadow: 0 0 5px 5px blanchedalmond;
     cursor: pointer;
+    z-index: 1;
 }
 
 .tile.destination::after, .holding-flag::after {
@@ -250,19 +259,16 @@ body {
 
 /*------------------------------------Player sprites------------------------------------*/
 .player1 {
-    --p1-col: #1f80da;
     background-color: var(--p1-col);
 }
 
 .player2 {
-    --p2-col: #be2f0e;
     background-color: var(--p2-col);
 }
 
 .sprite {
     --tile-rotation: 0rad; /* Needed so the flag can bob */
     position: absolute;
-    width: calc(var(--tile-w) * 1.3);
     aspect-ratio: 1 / 1;
     z-index: 3;
     transition: top 0.25s ease, left 0.25s ease;
@@ -281,11 +287,37 @@ body {
 }
 
 .sprite.Ganjalf {
+    width: calc(var(--tile-w) * 1.3);
     transform: translateX(-7%) translateY(-30%);
 }
 
+.sprite.Ganjalf.player1 {
+    background: url("./assets/Ganjalf-1.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.sprite.Ganjalf.player2 {
+    background: url("./assets/Ganjalf-2.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
 .sprite.Babatunde {
-    transform: translateX(-12%) translateY(-32%);
+    width: calc(var(--tile-w) * 1.2);
+    transform: translateX(-7%) translateY(-30%);
+}
+
+.sprite.Babatunde.player1 {
+    background: url("./assets/Babatunde-1.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.sprite.Babatunde.player2 {
+    background: url("./assets/Babatunde-2.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
 }
 
 /*-----------------------------------Player Info Cards----------------------------------*/
@@ -551,7 +583,7 @@ body {
     z-index: 999 !important;
 }
 
-.banner.win, .banner.lose, .banner.action {
+.banner.win, .banner.lose, .banner.action, .banner.combat {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -576,4 +608,109 @@ body {
     font-size: 2rem;
     color: #161516;
     content: "You got hit by:"
+}
+
+/*---------------------------------------Combat-----------------------------------------*/
+.banner.combat {
+    flex-direction: row;
+    gap: 4.5rem;
+}
+
+.combat > .proceed-btn {
+    visibility: visible;
+    position: unset;
+    z-index: 1;
+    transition: opacity .25s ease;
+}
+
+.player1.combat, .player2.combat {
+    display: flex;
+    flex-direction: row;
+    gap: 4rem;
+    align-items: center;
+    background: none;
+}
+
+.combat > .sprite {
+    position: unset;
+    transform: scale(2);
+    filter: drop-shadow(0 0 1rem blanchedalmond);
+}
+
+.combat > .sprite.player2 { transform: scale(-2, 2); }
+
+.combat-holders {
+    display: flex;
+    flex-direction: column;
+    gap: 4rem;
+    width: 8rem;
+    align-items: flex-start;
+}
+
+.player1 > .combat-holders :nth-child(2), .player2 > .combat-holders *:nth-child(odd) {
+    align-self: flex-end;
+}
+
+.combat-holder {
+    width: 5rem;
+    aspect-ratio: 1 / 1;
+    border-radius: 2.5rem;
+    display: flex;
+}
+
+.combat-holder.player1::after {
+    content: "";
+    position: absolute;
+    margin-left: 6rem;
+    margin-top: 1.8rem;
+    width: 18.3rem;
+    height: .5rem;
+    background: repeating-linear-gradient(
+        to right,
+        blanchedalmond 0,
+        blanchedalmond 1.25rem,
+        transparent 1.25rem,
+        transparent 1.85rem);
+    
+    pointer-events: none;
+}
+
+.player1 > .combat-holders :nth-child(2)::after { width: 12.3rem; }
+
+.combat-holder.player1 {
+    background: #1f80da80;
+    border: .3rem solid var(--p1-col);
+}
+
+.combat-holder.player2 {
+    background: #be2e0e80;
+    border: .3rem solid var(--p2-col);
+}
+
+.combat-holder:hover {
+    border: .3rem solid blanchedalmond;
+}
+
+.sword, .shield {
+    margin: auto;
+    aspect-ratio: 1 / 1;
+}
+
+.sword.dragging, .shield.dragging {
+  position: fixed !important;
+  pointer-events: none;
+}
+
+.sword {
+    background-image: url("./assets/Sword.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 4rem;
+}
+
+.shield {
+    background-image: url("./assets/Shield.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 3rem;
 }
