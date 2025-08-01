@@ -178,11 +178,18 @@ class Player {
             if(tiles.includes(blockedTile))
                 tiles[tiles.length - 1].classList.remove("destination");
         }
+
+        // The bollard softlock can hit you if you cut off your own remaining path:
+        if(!board.getElementsByClassName("destination").length)
+            this.proceedBtn.style.visibility = "visible";
     }
 
     computeMoves(roll) {
         this.paths = {};
         setDestinations(this.currentTile, roll);
+        if(!Object.keys(this.paths).length) this.proceedBtn.style.visibility = "visible";
+        // ^^^ Movement softlock usually caused by bollards. Allowing the user to skip their
+        // turn solves the softlock and lets them use effects that may save them.
     }
 
     get hasFlag() { return this.sprite.classList.contains("holding-flag"); }

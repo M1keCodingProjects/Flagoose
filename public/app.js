@@ -20,7 +20,7 @@ client.on("pick-hero", isPlayer1 => {
     console.log("New match started, I am player " + (1 + !isPlayer1));
     
     TILES.forEach(tile => tile.addEventListener("click", _=> {
-        if(canPlaceBollard) {
+        if(canPlaceBollard && player.currentTile !== tile && opponent.currentTile !== tile) {
             placeBollard(player.id, tile);
             canPlaceBollard = false;
             return;
