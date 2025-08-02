@@ -55,7 +55,7 @@ body {
     justify-content: center;
     align-items: self-end;
     overflow: hidden;
-    background: rgb(56, 139, 162);
+    background: #388ba2;
 }
 
 /*----------------------------------------Fonts-----------------------------------------*/
@@ -66,7 +66,7 @@ body {
   letter-spacing: .12rem;
 }
 
-.secret.card {
+.secret.card, .hero-card {
     font-family: "Nunito Sans", sans-serif;
     font-optical-sizing: auto;
     font-weight: 200;
@@ -471,7 +471,7 @@ body {
 .proceed-btn {
     visibility: hidden;
     position: fixed;
-    top: 19rem;
+    top: 20rem;
     padding: 1rem;
     border-radius: .25rem;
     background-color: rgb(43, 160, 43);
@@ -583,7 +583,7 @@ body {
     z-index: 999 !important;
 }
 
-.banner.win, .banner.lose, .banner.action, .banner.combat {
+.banner.win, .banner.lose, .banner.action, .banner.combat, .banner.select-hero {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -593,7 +593,7 @@ body {
 .banner.win::after, .banner.lose::after {
     font-size: 10rem;
     text-align: center;
-    color: rgb(222, 68, 21);
+    color: #de4415;
 }
 
 .banner.win::after {
@@ -608,6 +608,168 @@ body {
     font-size: 2rem;
     color: #161516;
     content: "You got hit by:"
+}
+
+.banner.select-hero {
+    background: #64bad2;
+    gap: 2rem;
+}
+
+.banner.select-hero::before {
+    position: absolute;
+    top: 2rem;
+    font-size: 6rem;
+    text-align: center;
+    color: #de4415;
+    content: "Welcome to Goolag";
+    text-wrap-mode: nowrap;
+}
+
+.banner.select-hero::after {
+    position: absolute;
+    top: 10rem;
+    font-size: 3rem;
+    text-align: center;
+    color: #49261b;
+    content: "Choose your hero:";
+}
+
+.banner.select-hero > .hero-carousel {
+    width: 30rem;
+    height: 30rem;
+    background: #00000033;
+    display: flex;
+    flex-direction: row;
+    margin-top: 12rem;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.banner.select-hero > .username-container {
+    display: flex;
+    flex-direction: row;
+    gap: 3rem;
+}
+
+.banner.select-hero .username {
+    width: 30rem;
+    height: 4rem;
+    border-radius: .5rem;
+    outline: none;
+    border: none;
+    box-shadow: .25rem .25rem 0 .5rem #3b1b0a;
+    align-self: center;
+    font-size: 2rem;
+}
+
+.ready-btn {
+    color: whitesmoke;
+    font-weight: bold;
+    background: #57c857;
+    width: 4rem;
+    font-size: 2rem;
+    text-align: center;
+    aspect-ratio: 1 / 1;
+    border-radius: 2rem;
+    line-height: 3.75rem;
+    box-shadow: -.25rem .25rem 0 .5rem #3b1b0a;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.ready-btn:not(.pressed):hover {
+    background: #73e973;
+}
+
+.ready-btn:not(.pressed):active {
+    transform: scale(0.9);
+}
+
+.ready-btn.pressed {
+    background: #3a6b3a;
+    color: #b4b4b4;
+    pointer-events: none;
+    cursor: auto;
+}
+
+.hero-carousel > .scroll {
+    background: url("./assets/destination.svg");
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 3rem;
+    height: 3rem;
+    cursor: pointer;
+}
+
+.hero-carousel > .scroll.disabled {
+    opacity: .5;
+    cursor: auto;
+}
+
+@keyframes scroll-left {
+    0%, 100% {
+        transform: rotate(90deg);
+    }
+
+    50% {
+        transform: translateX(-.5rem) rotate(90deg);
+    }
+}
+
+@keyframes scroll-right {
+    0%, 100% {
+        transform: rotate(-90deg);
+    }
+
+    50% {
+        transform: translateX(.5rem) rotate(-90deg);
+    }
+}
+
+.hero-carousel > .scroll.left { transform: rotate(90deg); }
+.hero-carousel > .scroll.right { transform: rotate(-90deg); }
+.hero-carousel > .scroll.left:not(.disabled):hover { animation: scroll-left 1.25s ease infinite; }
+.hero-carousel > .scroll.right:not(.disabled):hover { animation: scroll-right 1.25s ease infinite; }
+
+.hero-carousel > .hero-card {
+    position: absolute;
+    left: calc(50% - 7.5rem);
+    width: 15rem;
+    height: 25rem;
+    border-radius: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: linear-gradient(to bottom, #656c58 5%, #55523d 95%);
+    outline: 2px solid #99ff0038;
+    outline-offset: -1rem;
+    transition: opacity 0.2s ease;
+    padding: 1.5rem;
+}
+
+.hero-card > .name {
+    font-size: 1.75rem;
+    font-weight: bold;
+    color: #effff2;
+    line-height: 1.5rem;
+    padding-top: .25rem;
+}
+
+.hero-card > .image {
+    width: 12rem;
+    height: 10rem;
+    flex: unset;
+    align-self: center;
+    border: none;
+    background: #03150111;
+}
+
+.hero-card > .description {
+    color: #cdead3;
+    font-size: 1rem;
+    word-break: break-word;
+    hyphens: auto;
+    overflow-wrap: break-word;
 }
 
 /*---------------------------------------Combat-----------------------------------------*/

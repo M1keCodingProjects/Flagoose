@@ -278,9 +278,9 @@ const HEROS = {
 };
 
 let p1, p2, player;
-function setupPlayers() {
-    p1 = new Player(true, "P1", "Ganjalf");
-    p2 = new Player(false, "P2", "Babatunde");
+function setupPlayers(p1Username, p2Username, p1Hero, p2Hero) {
+    p1 = new Player(true,  p1Username || "P1", p1Hero);
+    p2 = new Player(false, p2Username || "P2", p2Hero);
 
     p1.opponent = p2;
     p2.opponent = p1;

@@ -12,12 +12,12 @@ client.on("opponent-disconnect", () => {
     throw new Error("Opponent disconnected");
 });
 
-client.on("pick-hero", isPlayer1 => {
-    gm.init();
+client.on("pick-hero", ({ playerId, p1Username, p2Username, p1Hero, p2Hero }) => {
+    gm.init(p1Username, p2Username, p1Hero, p2Hero);
     
-    player   = isPlayer1 ? p1 : p2;
-    opponent = isPlayer1 ? p2 : p1;
-    console.log("New match started, I am player " + (1 + !isPlayer1));
+    player   = playerId == 1 ? p1 : p2;
+    opponent = playerId == 1 ? p2 : p1;
+    console.log("New match started, I am player " + playerId);
     
     TILES.forEach(tile => tile.addEventListener("click", _=> {
         if(canPlaceBollard && player.currentTile !== tile && opponent.currentTile !== tile) {
@@ -29,8 +29,8 @@ client.on("pick-hero", isPlayer1 => {
         if(tile.classList.contains("destination") && gm.phase != "solving effects") gm.movePlayer(tile);
     }));
 
-    // Select heros n stuff...
-    if(!isPlayer1) client.emit("game-start");
+    removeHeroSelectionBanner();
+    if(playerId == 2) client.emit("game-start");
 });
 
 client.on("game-start", async firstToMove => {
@@ -156,9 +156,9 @@ class LocalGameManager {
         this.phase = GAME_PHASES.turnStart;
     }
 
-    init() {
+    init(p1Username, p2Username, p1Hero, p2Hero) {
         setupBoard();
-        setupPlayers();
+        setupPlayers(p1Username, p2Username, p1Hero, p2Hero);
         p1.proceedBtn.addEventListener("click", this.proceed.bind(this));
         p2.proceedBtn.addEventListener("click", this.proceed.bind(this));
     }

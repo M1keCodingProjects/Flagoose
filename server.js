@@ -52,18 +52,28 @@ class GameManager {
         client.on("opponent-move", path => client.broadcast.emit("opponent-move", path));
         client.on("game-start", () => this.server.emit("game-start", this.getFirstToMove()));
         client.on("match-end", winningPlayerId => this.server.emit("match-end", winningPlayerId));
-        
-        const isPlayer1 = this.p1 === null;
-        this[isPlayer1 ? "p1" : "p2"] = client;
-        
-        // Both are connected, we can proceed
-        if(this.p1 && this.p2) {
-            this.p1.emit("pick-hero", true); // Am I player 1?
-            this.p2.emit("pick-hero", false);
-        }
-    }
+        client.on("pick-hero", ({ username, hero }) => {
+            const isPlayer1 = this.p1 === null;
+            this[isPlayer1 ? "p1" : "p2"] = client;
+            client.username = username;
+            client.hero = hero;
+            
+            // If both are connected and picked a hero we can proceed:
+            if(!this.p1 || !this.p2) return;
 
-    get isPlayersTurn() { return this.turn % 2 == (player.turnId); }
+            const data = {
+                playerId : 1,
+                p1Username : this.p1.username,
+                p2Username : this.p2.username,
+                p1Hero : this.p1.hero,
+                p2Hero : this.p2.hero,
+            };
+            this.p1.emit("pick-hero", data);
+            
+            data.playerId++;
+            this.p2.emit("pick-hero", data);
+        });
+    }
 
     getFirstToMove() { return 1 + (Math.random() >= 0.5); }
 }
