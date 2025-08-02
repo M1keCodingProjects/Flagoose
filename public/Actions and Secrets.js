@@ -121,7 +121,7 @@ const ACTIONS = {
 }
 const ACTIONS_AMT = Object.keys(ACTIONS).length;
 
-function getRandomAction() { return ACTIONS.Secret;
+function getRandomAction() {
     return Object.values(ACTIONS)[getRandomIndex(ACTIONS_AMT)];
 }
 
