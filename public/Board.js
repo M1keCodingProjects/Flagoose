@@ -166,18 +166,18 @@ function setupBoard() {
 
     // Manual nudges:
     nudge(37, 0.2, -0.05);
-    nudge(38, 0.13, -0.03);
+    nudge(38, 0.13, -0.1);
     nudge(40, -0.1, 0.12);
     nudge(41, -0.1, 0.12);
-    nudge(42, -0.1, 0.12);
+    nudge(42, 0, -0.2);
     nudge(43, -0.05, 0.05);
 
     nudge(30, -0.1, 0.03);
-    nudge(31, 0, 0.01);
+    nudge(31, 0, -0.3);
     nudge(32, 0.1, -0.05);
     nudge(33, 0.15, -0.15);
     nudge(34, 0.18, -0.2);
-    nudge(35, 0.16, -0.15);
+    nudge(35, 0.16, -0.4);
     nudge(36, 0.1, -0.1);
 
     nudge(47, 1.1, 0.5);
@@ -195,5 +195,12 @@ function setupBoard() {
     setRoleMany("heal", 11, 26);
     setRoleMany("action", 6, 10, 21, 25, 30, 37);
     setRoleMany("secret", 7, 14, 22, 29, 45, 49);
+
+    // Counter rotation fix for those with assets:
+    for(const tile of TILES) {
+        if(tile.classList.length === 1 || tile.classList.contains("trap"))
+            tile.style.setProperty('--tile-rotation', "0deg");
+    }
+
     boardIsSet = true;
 }

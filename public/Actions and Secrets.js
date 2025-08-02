@@ -116,10 +116,12 @@ const ACTIONS = {
 
     Nothing: new Effect("Nothing", () => {}, "Nothing happens."),
     Papercut: new Effect("Papercut", onPapercutAction, "Lose 1 secret at random."),
+    SmallLoad: new Effect("SmallLoad", () => forcedRoll1Turns = 1, "Next roll will be a 1."),
+    Secret: new Effect("Secret", () => player.getNewSecret(getRandomSecret()), "Gain 1 secret at random."),
 }
 const ACTIONS_AMT = Object.keys(ACTIONS).length;
 
-function getRandomAction() {
+function getRandomAction() { return ACTIONS.Secret;
     return Object.values(ACTIONS)[getRandomIndex(ACTIONS_AMT)];
 }
 
