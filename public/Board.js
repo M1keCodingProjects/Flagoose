@@ -76,8 +76,12 @@ function addTile(angle, pos, isFirstOfPath = false) {
     tile.className  = "tile";
     tile.style.left = `calc(var(--tile-w) * ${pos.x})`;
     tile.style.top  = `calc(var(--tile-w) * ${pos.y})`;
-
     tile.style.setProperty('--tile-rotation', `${angle}rad`);
+
+    const img = document.createElement("div");
+    img.className = "tile-img";
+    tile.appendChild(img);
+
     board.appendChild(tile);
     TILES.push(tile);
     
@@ -166,18 +170,17 @@ function setupBoard() {
 
     // Manual nudges:
     nudge(37, 0.2, -0.05);
-    nudge(38, 0.13, -0.1);
+    nudge(38, 0.05, -0.1);
     nudge(40, -0.1, 0.12);
     nudge(41, -0.1, 0.12);
-    nudge(42, 0, -0.2);
     nudge(43, -0.05, 0.05);
 
     nudge(30, -0.1, 0.03);
-    nudge(31, 0, -0.3);
+    nudge(31, 0, -0.1);
     nudge(32, 0.1, -0.05);
     nudge(33, 0.15, -0.15);
     nudge(34, 0.18, -0.2);
-    nudge(35, 0.16, -0.4);
+    nudge(35, 0.16, -0.1);
     nudge(36, 0.1, -0.1);
 
     nudge(47, 1.1, 0.5);
@@ -198,7 +201,7 @@ function setupBoard() {
 
     // Counter rotation fix for those with assets:
     for(const tile of TILES) {
-        if(tile.classList.length === 1 || tile.classList.contains("trap"))
+        if(tile.classList.length === 1 || tile.classList.contains("trap") || tile.classList.contains("start"))
             tile.style.setProperty('--tile-rotation', "0deg");
     }
 
