@@ -1,8 +1,7 @@
-let selectedHeroId = 1;
-
 const usernameInput = document.getElementById("username-input");
 const heroCards = [...document.getElementsByClassName("hero-card")];
 const [leftScroll, rightScroll] = document.getElementsByClassName("scroll");
+let selectedHeroId = heroCards.length - 1;
 document.getElementsByClassName("ready-btn")[0].addEventListener("click", event => {
     client.emit("pick-hero", {
         username : usernameInput.value.toUpperCase(),
@@ -21,7 +20,10 @@ function onHeroCardsScroll(isScrollRight) {
 
     fadeCard(selectedHeroId, false);
     selectedHeroId += isScrollRight * 2 - 1;
-    selectedHeroId  = Math.abs(selectedHeroId % heroCards.length);
+    selectedHeroId  = selectedHeroId >= 0 ?
+        Math.abs(selectedHeroId % heroCards.length) :
+        selectedHeroId + heroCards.length;
+    
     fadeCard(selectedHeroId, true);
 };
 leftScroll.onclick  = () => onHeroCardsScroll(false);

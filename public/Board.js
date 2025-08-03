@@ -201,7 +201,7 @@ function setupBoard() {
 
     // Counter rotation fix for those with assets:
     for(const tile of TILES) {
-        if(tile.classList.length === 1 || tile.classList.contains("trap") || tile.classList.contains("start"))
+        if(tile.classList.length === 1 || tile.classList.contains("trap") || tile.classList.contains("start") || tile.classList.contains("damage"))
             tile.style.setProperty('--tile-rotation', "0deg");
     }
 

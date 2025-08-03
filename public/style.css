@@ -150,27 +150,25 @@ body {
     transform: translateX(.9rem) translateY(-.6rem);
 }
 
-.tile.damage, .tile.heal, .tile.flag, .tile.secret, .tile.action {
+.tile.heal, .tile.flag, .tile.secret, .tile.action {
     --tile-scl: 1;
     transform: rotate(var(--tile-rotation));
 }
 
 /* Until a sprite exists: */
-.tile.damage > .tile-img, .tile.heal > .tile-img, .tile.flag > .tile-img, .tile.secret > .tile-img, .tile.action > .tile-img { visibility: hidden; }
+.tile.heal > .tile-img, .tile.flag > .tile-img, .tile.secret > .tile-img, .tile.action > .tile-img { visibility: hidden; }
 
 .tile.flag {
     background: rgb(247, 213, 48);
 }
 
 .tile.damage {
-    background: #9c1fda;
+    --tile-scl: 1.2;
 }
 
-.tile.damage::before {
-    content: "-1";
-    position: absolute;
-    font-size: 1.5em;
-    transform: rotate(calc(-1 * var(--tile-rotation)));
+.tile.damage > .tile-img {
+    background: url("./assets/Damage.svg") no-repeat center/contain;
+    transform: translateY(-.4rem);
 }
 
 .tile.trap {
@@ -211,7 +209,6 @@ body {
 
 /*------------------------------------Hovering stuff------------------------------------*/
 .tile.destination {
-    /*box-shadow: 0 0 5px 5px blanchedalmond;*/
     filter: drop-shadow(0 0 5px blanchedalmond);
     cursor: pointer;
     z-index: 1;
@@ -299,6 +296,7 @@ body {
     z-index: 3;
     transition: top 0.25s ease, left 0.25s ease;
     pointer-events: none;
+    transform: translateX(-7%) translateY(-30%);
 }
 
 .sprite.hop {
@@ -314,7 +312,6 @@ body {
 
 .sprite.Ganjalf {
     width: calc(var(--tile-w) * 1.3);
-    transform: translateX(-7%) translateY(-30%);
 }
 
 .sprite.Ganjalf.player1 { background: url("./assets/ganjalf-1.svg") no-repeat center/contain; }
@@ -322,11 +319,17 @@ body {
 
 .sprite.Babatunde {
     width: calc(var(--tile-w) * 1.2);
-    transform: translateX(-7%) translateY(-30%);
 }
 
 .sprite.Babatunde.player1 { background: url("./assets/Babatunde-1.svg") no-repeat center/contain; }
 .sprite.Babatunde.player2 { background: url("./assets/Babatunde-2.svg") no-repeat center/contain; }
+
+.sprite.Colorado {
+    width: calc(var(--tile-w) * 1.3);
+}
+
+.sprite.Colorado.player1 { background: url("./assets/Colorado-1.svg") no-repeat center/contain; }
+.sprite.Colorado.player2 { background: url("./assets/Colorado-2.svg") no-repeat center/contain; }
 
 /*-----------------------------------Player Info Cards----------------------------------*/
 .info {
